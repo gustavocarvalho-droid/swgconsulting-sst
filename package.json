@@ -1,0 +1,14 @@
+{
+  "name": "swg-consulting-sst",
+  "version": "1.0.0",
+  "description": "SWG Consulting SST — Sistema Unificado de Gestão SST",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  },
+  "engines": { "node": ">=18" }
+}
