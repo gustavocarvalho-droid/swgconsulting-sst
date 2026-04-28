@@ -6013,13 +6013,14 @@ document.addEventListener('DOMContentLoaded', function() {
           ${e.municipio  ? `<div class="emp-row"><span class="emp-lbl">Cidade</span><span class="emp-val">${bEsc(e.municipio)}</span></div>` : ''}
           ${e.atividade  ? `<div class="emp-row"><span class="emp-lbl">Atividade</span><span class="emp-val">${bEsc(e.atividade)}</span></div>` : ''}
 
-          <!-- Telefone com click-to-call -->
+          <!-- Telefone com click-to-call + WhatsApp -->
           ${e.telefone ? `<div class="emp-row">
             <span class="emp-lbl">Telefone</span>
-            <a href="tel:+${fmtTelLink(e.telefone)}" class="emp-val" style="color:var(--rise-med);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
-              📞 ${bEsc(e.telefone)}
-            </a>
-            <button class="cp-btn" onclick="bCopy(this,'${(e.telefone||'').replace(/'/g,"\\'")}')">copiar</button>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px;flex:1">
+              <span class="emp-val" style="font-weight:600">${bEsc(e.telefone)}</span>
+              <a href="tel:+${fmtTelLink(e.telefone)}" style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;background:#eaf3de;color:#3B6D11;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none">📞 Ligar</a>
+              <a href="https://wa.me/${fmtTelLink(e.telefone)}" target="_blank" style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;background:#e8f5e9;color:#1a7a46;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none">💬 WA</a>
+            </div>
           </div>` : ''}
 
           <!-- E-mail -->
@@ -6035,13 +6036,14 @@ document.addEventListener('DOMContentLoaded', function() {
             <span class="emp-val" style="color:#185FA5;font-weight:600">👤 ${bEsc(gmbContato)}</span>
           </div>` : ''}
 
-          <!-- Telefone GMB com click-to-call -->
+          <!-- Telefone GMB com click-to-call + WhatsApp -->
           ${gmbTel ? `<div class="emp-row">
-            <span class="emp-lbl">Telefone GMB</span>
-            <a href="tel:+${fmtTelLink(gmbTel)}" class="emp-val" style="color:#25D366;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
-              📞 ${bEsc(gmbTel)}
-            </a>
-            <button class="cp-btn" onclick="bCopy(this,'${(gmbTel||'').replace(/'/g,"\\'")}')">copiar</button>
+            <span class="emp-lbl">Tel. GMB</span>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px;flex:1">
+              <span class="emp-val" style="color:#25D366;font-weight:700">${bEsc(gmbTel)}</span>
+              <a href="tel:+${fmtTelLink(gmbTel)}" style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;background:#eaf3de;color:#3B6D11;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none">📞 Ligar</a>
+              <a href="https://wa.me/${fmtTelLink(gmbTel)}" target="_blank" style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;background:#e8f5e9;color:#1a7a46;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none">💬 WA</a>
+            </div>
           </div>` : ''}
 
           <!-- Site -->
@@ -6193,99 +6195,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const wrap = document.getElementById('enrich-' + cardId);
     if (!wrap) return;
 
-    // ── Refresh GMB phone fields in the card if available ──
-    const gmbTel = data.gmb_phone || data.gmb_telefone || data.gmb_whatsapp;
-    const gmbContato = data.gmb_contact || data.gmb_responsavel || data.gmb_owner;
-    if (gmbTel || gmbContato) {
-      const cardEl = wrap.closest('.emp-card');
-      if (cardEl) {
-        // Update or add GMB phone row
-        let gmbRow = cardEl.querySelector('.gmb-tel-row');
-        if (!gmbRow && gmbTel) {
-          const d = String(gmbTel).replace(/\D/g,'');
-          const num = d.startsWith('55') ? d : '55' + d;
-          const newRow = document.createElement('div');
-          newRow.className = 'emp-row gmb-tel-row';
-          newRow.innerHTML = `<span class="emp-lbl">Tel. GMB</span>
-            <a href="tel:+${num}" class="emp-val" style="color:#25D366;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
-              📞 ${gmbTel}
-            </a>`;
-          wrap.parentNode.insertBefore(newRow, wrap);
-        }
-        // Update or add GMB contact row
-        let gmbCRow = cardEl.querySelector('.gmb-contact-row');
-        if (!gmbCRow && gmbContato) {
-          const newRow2 = document.createElement('div');
-          newRow2.className = 'emp-row gmb-contact-row';
-          newRow2.innerHTML = `<span class="emp-lbl">Contato GMB</span>
-            <span class="emp-val" style="color:#185FA5;font-weight:600">👤 ${gmbContato}</span>`;
-          wrap.parentNode.insertBefore(newRow2, wrap);
-        }
-      }
+    function fmtD(d) { return String(d||'').replace(/\D/g,''); }
+    function telLink(t) { const d=fmtD(t); return d.startsWith('55')?d:'55'+d; }
+    function contactBtns(tel, wa) {
+      const t = tel||wa; const w = wa||tel;
+      let html = '';
+      if (t) html += `<a href="tel:+${telLink(t)}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#eaf3de;color:#3B6D11;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;margin-right:4px">📞 Ligar</a>`;
+      if (w) html += `<a href="https://wa.me/${telLink(w)}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#e8f5e9;color:#1a7a46;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">💬 WhatsApp</a>`;
+      return html;
+    }
+    function row(icon, label, value, extra) {
+      if (!value) return '';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #f0eff8">
+        <span style="font-size:13px;flex-shrink:0">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;font-weight:700;color:#7878A8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px">${label}</div>
+          <div style="font-size:12px;color:#1E1E5C;font-weight:600;word-break:break-all">${bEsc(String(value))}</div>
+          ${extra||''}
+        </div>
+      </div>`;
     }
 
-    // ── CNAE / Grau de Risco block ──
-    const riscoCores = {1:'#3B6D11',2:'#854F0B',3:'#C05621',4:'#A32D2D'};
-    const riscoBgs   = {1:'#eaf3de',2:'#fef3e2',3:'#fff0e6',4:'#fcebeb'};
-    const riscoIcons = {1:'🟢',2:'🟡',3:'🟠',4:'🔴'};
-    const grau = data.cnae_grau_risco;
+    // ── Telephones with buttons ──
+    const recTel = data.receita_telefone;
+    const gmbTel = data.gmb_telefone;
+    const gmbWa  = data.gmb_whatsapp;
 
-    let cnaeBlock = '';
-    if (grau) {
-      const cor = riscoCores[grau];
-      const bg  = riscoBgs[grau];
-      const ico = riscoIcons[grau];
-      const servs = (data.cnae_servicos_sst||[]).map(s =>
-        `<span style="background:#f0eff8;border:1px solid #c2bfe0;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:#3a4096;margin:2px">${s}</span>`
-      ).join('');
-      cnaeBlock = `
-        <div style="background:${bg};border:1px solid ${cor}33;border-radius:8px;padding:10px 12px;margin-bottom:10px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <span style="font-size:18px">${ico}</span>
-            <div>
-              <div style="font-weight:800;color:${cor};font-size:13px">${data.cnae_grau_label||''}</div>
-              ${data.cnae_codigo ? `<div style="font-size:10px;color:#7878A8">CNAE ${data.cnae_codigo}${data.cnae_descricao?' — '+data.cnae_descricao:''}</div>` : ''}
-            </div>
-          </div>
-          ${servs ? `<div style="margin-top:6px"><div style="font-size:10px;font-weight:700;color:#7878A8;margin-bottom:4px">SERVIÇOS SST RECOMENDADOS</div><div style="display:flex;flex-wrap:wrap;gap:3px">${servs}</div></div>` : ''}
-          ${data.cnaes_secundarios ? `<div style="font-size:10px;color:#7878A8;margin-top:6px">Secundários: ${bEsc(data.cnaes_secundarios)}</div>` : ''}
-        </div>`;
-    }
+    let telBlock = '';
+    if (recTel) telBlock += row('📞','Telefone (Receita Federal)', recTel, contactBtns(recTel, null));
+    if (gmbTel && gmbTel !== recTel) telBlock += row('📞','Telefone GMB', gmbTel, contactBtns(gmbTel, gmbWa||gmbTel));
+    else if (gmbWa) telBlock += row('💬','WhatsApp GMB', bFmtWA(gmbWa), contactBtns(null, gmbWa));
 
-    // ── Receita Federal block ──
-    const receitaFields = [
-      { lbl: '🏢 Razão Social', val: data.receita_razao_social },
-      { lbl: '📋 Situação',     val: data.receita_situacao },
-      { lbl: '🏭 Porte',        val: data.receita_porte },
-      { lbl: '📅 Abertura',     val: data.receita_abertura },
-      { lbl: '💰 Capital',      val: data.receita_capital ? 'R$ ' + Number(data.receita_capital).toLocaleString('pt-BR') : null },
-      { lbl: '📍 Endereço',     val: data.receita_logradouro },
-      { lbl: '📞 Telefone',     val: data.receita_telefone || data.gmb_telefone },
-      { lbl: '✉️ Email',        val: data.receita_email || data.gmb_email },
-    ];
-    const receitaRows = receitaFields.filter(f=>f.val).map(f =>
-      `<div class="enrich-item"><span class="enrich-lbl" style="min-width:90px">${f.lbl}</span><span class="enrich-val">${bEsc(String(f.val))}</span></div>`
-    ).join('');
+    // ── Receita Federal rows ──
+    const rfRows = [
+      row('🏢','Razão Social',  data.receita_razao_social),
+      row('📋','Situação',      data.receita_situacao),
+      row('🏭','Porte',         data.receita_porte),
+      row('📅','Abertura',      data.receita_abertura),
+      row('💰','Capital Social',data.receita_capital ? 'R$ '+Number(data.receita_capital).toLocaleString('pt-BR') : null),
+      row('📍','Endereço',      data.receita_logradouro),
+      row('✉️','E-mail',        data.receita_email || data.gmb_email),
+    ].filter(Boolean).join('');
 
-    // ── GMB block ──
-    const gmbFields = [
-      { lbl: '📱 WhatsApp', val: data.gmb_whatsapp ? bFmtWA(data.gmb_whatsapp) : null, wa: data.gmb_whatsapp },
-      { lbl: '⭐ Avaliação', val: data.gmb_rating ? data.gmb_rating + ' (' + (data.gmb_reviews||0) + ' avaliações)' : null },
-      { lbl: '🕐 Horário',  val: data.gmb_horario },
-      { lbl: '🏷 Categoria',val: data.gmb_categoria },
-      { lbl: '🌐 Site',     val: data.gmb_site || data.site },
-    ];
-    const gmbRows = gmbFields.filter(f=>f.val).map(f => {
-      const extra = f.wa ? `<a href="https://wa.me/${f.wa}" target="_blank" style="margin-left:8px;font-size:10px;color:#25D366;font-weight:700;text-decoration:none">Abrir ↗</a>` : '';
-      return `<div class="enrich-item"><span class="enrich-lbl" style="min-width:90px">${f.lbl}</span><span class="enrich-val">${bEsc(String(f.val))}${extra}</span></div>`;
-    }).join('');
+    // ── GMB rows ──
+    const gmbRows = [
+      row('⭐','Avaliação', data.gmb_rating ? data.gmb_rating+' ('+( data.gmb_reviews||0)+' avaliações)' : null),
+      row('🕐','Horário',   data.gmb_horario),
+      row('🏷','Categoria', data.gmb_categoria),
+      row('🌐','Site',      data.gmb_site || data.site),
+    ].filter(Boolean).join('');
 
-    wrap.innerHTML = `
-      ${cnaeBlock}
-      ${receitaRows ? `<div class="enrich-title" style="margin-top:4px">🏦 Receita Federal</div>${receitaRows}` : ''}
-      ${gmbRows ? `<div class="enrich-title" style="margin-top:10px">📍 Google Meu Negócio</div>${gmbRows}` : ''}
-      ${!cnaeBlock && !receitaRows && !gmbRows ? '<div class="enrich-loading">Nenhum dado adicional encontrado</div>' : ''}
-    `;
+    const hasData = telBlock || rfRows || gmbRows;
+
+    wrap.innerHTML = hasData ? `
+      <div style="background:#fff;border:1px solid #e0dfef;border-radius:10px;padding:12px;margin-top:8px">
+        ${telBlock ? `
+          <div style="font-size:10px;font-weight:700;color:#3a4096;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">📞 Contatos</div>
+          ${telBlock}
+        ` : ''}
+        ${rfRows ? `
+          <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.6px;text-transform:uppercase;margin:10px 0 6px">🏦 Receita Federal</div>
+          ${rfRows}
+        ` : ''}
+        ${gmbRows ? `
+          <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.6px;text-transform:uppercase;margin:10px 0 6px">📍 Google Meu Negócio</div>
+          ${gmbRows}
+        ` : ''}
+      </div>` : '<div style="color:#7878A8;font-size:12px;padding:8px">Nenhum dado adicional encontrado.</div>';
+
     wrap.style.display = 'block';
   }
 
@@ -10943,450 +10920,78 @@ function crmRenderKanban(tab) {
 
 // ── Lead card HTML ──
 function crmLeadCard(l, tab) {
-  const avatarColors = ['#3a4096','#185FA5','#3B6D11','#854F0B','#A32D2D','#6B3A9E','#0D7A6E','#B5471F'];
-  const avatarColor  = avatarColors[(l.empresa||l.nome||'A').charCodeAt(0) % avatarColors.length];
-  const ini  = initials(l.empresa||l.nome||'?');
-  const tel  = (l.tel||'').replace(/\D/g,'');
-  const now  = Date.now();
-  const DAY  = 86400000;
-  const dias = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/DAY);
+  const colors = ['#3a4096','#185FA5','#3B6D11','#854F0B','#A32D2D','#6B3A9E','#0D7A6E','#B5471F'];
+  const bg     = colors[(l.empresa||l.nome||'A').charCodeAt(0) % colors.length];
+  const ini    = initials(l.empresa||l.nome||'?');
+  const tel    = (l.tel||'').replace(/\D/g,'');
+  const telFull= tel && !tel.startsWith('55') ? '55'+tel : tel;
+  const now    = Date.now();
+  const dias   = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/86400000);
 
-  // Urgency indicator
-  const urgColor = dias>14 ? '#A32D2D' : dias>7 ? '#854F0B' : '#3B6D11';
-  const urgBg    = dias>14 ? '#fcebeb' : dias>7 ? '#fef3e2' : '#eaf3de';
-  const urgLabel = dias>14 ? `🔴 ${dias}d` : dias>7 ? `🟡 ${dias}d` : dias>0 ? `🟢 ${dias}d` : '🆕';
+  // Status badge
+  const statusMap = {
+    novo:       {label:'Novo Lead',       color:'#1E1E5C', bg:'#eef0fa'},
+    contato:    {label:'Sem Contato',     color:'#854F0B', bg:'#fef3e2'},
+    proposta:   {label:'Proposta',        color:'#185FA5', bg:'#e8f0fb'},
+    negociacao: {label:'Negociação',      color:'#3B6D11', bg:'#eaf3de'},
+    fechado:    {label:'Fechado ✓',       color:'#3B6D11', bg:'#eaf3de'},
+    perdido:    {label:'Sem Interesse',   color:'#A32D2D', bg:'#fcebeb'},
+  };
+  const st = statusMap[l.status] || {label: l.status||'Novo', color:'#7878A8', bg:'#f0eff8'};
 
-  // Last history entry
-  const hist     = (l.historico||[]);
-  const lastNote = hist.length ? hist[hist.length-1] : null;
-  const lastNoteText = lastNote ? lastNote.title : '';
-  const lastNoteDate = lastNote ? fmtDate(lastNote.ts) : '';
+  // Urgency dot
+  const urgDot = dias>14 ? '🔴' : dias>7 ? '🟡' : '';
 
-  // Google Meu Negocio search URL
-  const gmbUrl = `https://www.google.com/search?q=${encodeURIComponent((l.empresa||l.nome||'')+(l.cidade?' '+l.cidade:''))}`;
+  // Last note
+  const hist = l.historico||[];
+  const last = hist[hist.length-1];
 
-  const cardId = 'crm-sel-' + l.id;
+  // GMB URL
+  const gmb = 'https://www.google.com/search?q=' + encodeURIComponent((l.empresa||l.nome||'') + ' ' + (l.cidade||''));
 
-  return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" id="crm-card-${l.id}">
-    <!-- LOGO + NOME -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <div style="width:36px;height:36px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.empresa||l.nome||'—')}</div>
-        ${l.cidade?`<div style="font-size:10px;color:#7878A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.cidade)}</div>`:''}
-      </div>
-      <div style="padding:2px 6px;border-radius:999px;font-size:9px;font-weight:700;background:${urgBg};color:${urgColor};flex-shrink:0">${urgLabel}</div>
-    </div>
+  return [
+    '<div class="crm-lead-card priority-'+(l.prioridade||'baixa')+'" style="cursor:pointer" onclick="crmOpenLead(\''+l.id+'\',\''+tab+'\')">',
 
-    <!-- RESPONSÁVEL -->
-    ${l.responsavel?`<div style="font-size:11px;color:#5B5BAA;margin-bottom:6px;display:flex;align-items:center;gap:4px">
-      <span style="width:14px;height:14px;border-radius:50%;background:#e7e6f4;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#3a4096;flex-shrink:0">${initials(l.responsavel)}</span>
-      ${esc(l.responsavel)}
-    </div>`:''}
+    // ── Header: avatar + nome + status ──
+    '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">',
+      '<div style="width:40px;height:40px;min-width:40px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff">'+ini+'</div>',
+      '<div style="flex:1;min-width:0">',
+        '<div style="font-size:14px;font-weight:800;color:#1E1E5C;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(l.empresa||l.nome||'—')+(urgDot?' '+urgDot:'')+'</div>',
+        '<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;background:'+st.bg+';color:'+st.color+'">'+st.label+'</span>',
+      '</div>',
+    '</div>',
 
-    <!-- HISTÓRICO (última nota) -->
-    ${lastNoteText?`<div style="background:#f8f7fc;border-radius:6px;padding:5px 8px;margin-bottom:8px;font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-      💬 ${esc(lastNoteText)}
-      <span style="font-size:9px;color:#c2bfe0;margin-left:4px">${lastNoteDate}</span>
-    </div>`:''}
+    // ── Info row ──
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;color:#7878A8">',
+      l.cidade ? '<span>📍 '+esc(l.cidade)+'</span>' : '',
+      l.responsavel ? '<span>👤 '+esc(l.responsavel.split(' ')[0])+'</span>' : '',
+      l.valor ? '<span style="color:#3B6D11;font-weight:700">'+fmtVal(l.valor)+'</span>' : '',
+    '</div>',
 
-    <!-- BOTÕES: Selecionar | Ligar | GMB | Abrir | Excluir -->
-    <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr auto;gap:4px;align-items:center">
-      <!-- Selecionar (checkbox) -->
-      <input type="checkbox" id="${cardId}" style="width:14px;height:14px;cursor:pointer;accent-color:#3a4096"
-        onclick="event.stopPropagation();crmToggleSelect('${l.id}','${tab}',this)"
-        title="Selecionar para ação em massa">
+    // ── Last note ──
+    last ? '<div style="font-size:11px;color:#5B5BAA;padding:5px 9px;background:#f8f7fc;border-radius:6px;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">💬 '+esc(last.title)+'</div>' : '',
 
-      <!-- Ligar -->
-      ${tel?`<a href="tel:+${tel.startsWith('55')?tel:'55'+tel}" onclick="event.stopPropagation()"
-        style="padding:5px 4px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px"
-        title="Ligar">📞 Ligar</a>`
-      :`<div></div>`}
+    // ── Action buttons ──
+    '<div style="display:flex;gap:5px;align-items:center" onclick="event.stopPropagation()">',
+      // Checkbox selecionar
+      '<input type="checkbox" id="crm-sel-'+l.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#3a4096;flex-shrink:0" onclick="crmToggleSelect(\''+l.id+'\',\''+tab+'\',this)" title="Selecionar">',
 
-      <!-- Google Meu Negócio -->
-      <a href="${gmbUrl}" target="_blank" onclick="event.stopPropagation()"
-        style="padding:5px 4px;background:#e7e6f4;color:#3a4096;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px"
-        title="Google Meu Negócio">🗺️ GMB</a>
+      // Ligar
+      tel ? '<a href="tel:+'+telFull+'" style="flex:1;padding:6px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px" title="Ligar">📞 Ligar</a>'
+          : '<div style="flex:1"></div>',
 
-      <!-- Abrir Lead -->
-      <button style="padding:5px 4px;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"
-        onclick="event.stopPropagation();crmOpenLead('${l.id}','${tab}')">Abrir</button>
+      // GMB
+      '<a href="'+gmb+'" target="_blank" style="flex:1;padding:6px;background:#e7e6f4;color:#3a4096;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px" title="Google Meu Negócio">🗺️ GMB</a>',
 
-      <!-- Excluir -->
-      <button style="padding:5px 7px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:12px;cursor:pointer"
-        onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir lead">🗑</button>
-    </div>
-  </div>`;
-}
+      // Abrir
+      '<button style="flex:1;padding:6px;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();crmOpenLead(\''+l.id+'\',\''+tab+'\')">Abrir</button>',
 
+      // Excluir
+      '<button style="padding:6px 8px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:12px;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();crmDelLead(\''+l.id+'\',\''+tab+'\')" title="Excluir">🗑</button>',
+    '</div>',
 
-// ── Render table for tab ──
-function crmRenderTable(tab) {
-  const board = document.getElementById('crm-board-'+tab);
-  if (board) board.style.display = 'none';
-  const tableWrap = document.getElementById('crm-table-'+tab);
-  if (tableWrap) tableWrap.style.display = 'block';
-  const tbody = document.getElementById('crm-tbody-'+tab);
-  if (!tbody) return;
-  const ls = crmFiltered(tab);
-  if (!ls.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#7878A8">Nenhum lead encontrado</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = ls.map(l => `
-    <tr onclick="crmOpenLead('${l.id}','${tab}')">
-      <td>
-        <div style="font-weight:700;color:#1E1E5C;font-size:13px">${esc(l.empresa||l.nome||'—')}</div>
-        <div style="font-size:11px;color:#7878A8">${esc(l.nome||'')}${l.cnpj?` · ${esc(l.cnpj)}`:''}</div>
-      </td>
-      <td><span class="crm-status ${statusClass(l.status)}">${esc(statusLabel(l.status))}</span></td>
-      <td style="font-weight:700;color:${l.valor?'#3B6D11':'#7878A8'}">${l.valor?fmtVal(l.valor):'—'}</td>
-      <td>${l.proxAcao?`<div style="font-size:12px;color:${l.proxAcaoTs&&l.proxAcaoTs<Date.now()?'#A32D2D':'#1E1E5C'}">${esc(l.proxAcao)}</div><div style="font-size:10px;color:#7878A8">${fmtDate(l.proxAcaoTs)}</div>`:'<span style="color:#7878A8;font-size:12px">—</span>'}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div style="width:22px;height:22px;border-radius:50%;background:#e7e6f4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#3a4096">${initials(l.responsavel)}</div>
-          <span style="font-size:12px">${esc(l.responsavel||'—')}</span>
-        </div>
-      </td>
-      <td><div class="crm-priority"><div class="crm-priority-dot" style="background:${priorityColor(l.prioridade)}"></div><span style="font-size:11px;font-weight:600;color:${priorityColor(l.prioridade)}">${l.prioridade||'baixa'}</span></div></td>
-      <td style="font-size:11px;color:#7878A8">${fmtDate(l.criadoEm)}</td>
-      <td onclick="event.stopPropagation()">
-        <div style="display:flex;gap:4px">
-          <button class="crm-btn crm-btn-xs" onclick="crmOpenLead('${l.id}','${tab}')">✏</button>
-          <button class="crm-btn crm-btn-xs crm-btn-danger" onclick="crmDelLead('${l.id}','${tab}')">🗑</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
-// ── Set view (kanban/table) ──
-function crmSetView(v, tab) {
-  tab = tab || activeTab;
-  crmViews[tab] = v;
-  document.getElementById('crm-vk-'+tab)?.classList.toggle('active', v==='kanban');
-  document.getElementById('crm-vt-'+tab)?.classList.toggle('active', v==='table');
-  crmRenderTab(tab);
-}
-window.crmSetView = crmSetView;
-
-// ── Filter by status via KPI click ──
-function crmFilterStatus(st, tab) {
-  tab = tab || activeTab;
-  const sel = document.getElementById('crm-fstatus-'+tab);
-  if (sel) sel.value = st;
-  crmRenderTab(tab);
-}
-window.crmFilterStatus = crmFilterStatus;
-
-// ── Open lead ──
-function crmOpenLead(id, tab) {
-  tab = tab || activeTab;
-  crmLoad();
-  const l = (crmData[tab]||[]).find(x=>x.id===id);
-  if (!l) return;
-  activeTab = tab;
-  crmShowModal(crmLeadModal(l, null, tab));
-}
-window.crmOpenLead = crmOpenLead;
-
-// ── Open new lead ──
-function crmOpenNew(status, tab) {
-  tab = tab || activeTab;
-  activeTab = tab;
-  crmShowModal(crmLeadModal(null, status||'novo', tab));
-}
-window.crmOpenNew = crmOpenNew;
-
-// ── Lead modal ──
-function crmLeadModal(l, defaultStatus, tab) {
-  tab = tab || activeTab;
-  const isNew  = !l;
-  const status = l?.status || defaultStatus || 'novo';
-  const colOpts = crmCols.map(c=>`<option value="${c.id}" ${status===c.id?'selected':''}>${c.label}</option>`).join('');
-  const tabOpts = CRM_TABS.map(t => {
-    const lbl = t==='empresa' ? empresaName : t==='buscador' ? 'Buscador' : 'ZapDisparos';
-    return `<option value="${t}" ${t===tab?'selected':''}>${lbl}</option>`;
-  }).join('');
-  const svcChecks = SERVICES.map(s => `
-    <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:6px;border:1px solid ${(l?.servicos||[]).includes(s)?'#3a4096':'#c2bfe0'};background:${(l?.servicos||[]).includes(s)?'#e7e6f4':'#f8f7fc'};margin:3px;transition:all .15s">
-      <input type="checkbox" name="crm-svc" value="${s}" ${(l?.servicos||[]).includes(s)?'checked':''} style="width:auto;accent-color:#3a4096"> ${s}
-    </label>`).join('');
-
-  const timeline = (l?.historico||[]).slice(-5).reverse().map(h => `
-    <div class="crm-timeline-item">
-      <div class="crm-timeline-dot" style="background:${h.type==='fechado'?'#eaf3de':h.type==='status'?'#e7e6f4':'#dce8f8'};font-size:11px">
-        ${{nota:'📝',status:'🔄',criado:'🆕',contato:'📞',proposta:'📄',fechado:'✅'}[h.type]||'•'}
-      </div>
-      <div class="crm-timeline-body">
-        <div class="crm-timeline-title">${esc(h.title)}</div>
-        <div class="crm-timeline-time">${fmtDate(h.ts)}</div>
-        ${h.note?`<div class="crm-timeline-note">${esc(h.note)}</div>`:''}
-      </div>
-    </div>`).join('');
-
-  return `
-    <div class="crm-modal-header" style="background:#0D0D2E;border-radius:16px 16px 0 0;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.08)">
-      <div style="flex:1">
-        ${!isNew?`<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:6px">Lead criado em ${fmtDate(l?.criadoEm)}</div>`:''}
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:44px;height:44px;border-radius:50%;background:#3a4096;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">${initials(l?.empresa||l?.nome||'N')}</div>
-          <div>
-            <div style="font-size:18px;font-weight:800;color:#fff">${isNew?'+ Novo Lead':esc(l.empresa||l.nome||'Lead')}</div>
-            ${!isNew&&l.segmento?`<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">${esc(l.segmento)}</div>`:''}
-          </div>
-        </div>
-      </div>
-      <button style="background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;line-height:1;padding:4px" onclick="crmCloseModal()">×</button>
-    </div>
-
-    ${!isNew?`
-    <!-- AÇÕES RÁPIDAS -->
-    <div style="padding:16px 22px;background:#f8f7fc;border-bottom:1px solid #e7e6f4">
-      <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">AÇÕES DO CRM</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
-        ${['novo','contato','proposta','negociacao','fechado','perdido'].map(s => {
-          const labels = {novo:'Novo lead',contato:'Sem contato',proposta:'Proposta enviada',negociacao:'Em negociação',fechado:'Fechado ✓',perdido:'Sem interesse'};
-          const active = l.status === s;
-          return `<button onclick="crmQuickStatusDirect('${l.id}','${tab}','${s}')"
-            style="padding:6px 12px;border-radius:999px;border:1px solid ${active?'#1E1E5C':'#c2bfe0'};background:${active?'#1E1E5C':'#fff'};color:${active?'#fff':'#1E1E5C'};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">${labels[s]}</button>`;
-        }).join('')}
-      </div>
-      <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">ATALHOS</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${l.tel?`<a href="tel:+${(l.tel||'').replace(/\D/g,'')}" style="padding:8px 14px;background:#eaf3de;color:#3B6D11;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">📞 Ligação</a>`:''}
-        ${l.tel?`<a href="https://wa.me/55${(l.tel||'').replace(/\D/g,'').replace(/^55/,'')}" target="_blank" style="padding:8px 14px;background:#e8f5e9;color:#2E7D32;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">💬 WhatsApp</a>`:''}
-        ${l.empresa?`<a href="https://www.google.com/search?q=${encodeURIComponent((l.empresa||'')+' '+l.cidade)}" target="_blank" style="padding:8px 14px;background:#e7e6f4;color:#3a4096;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">🔍 Pesquisar</a>`:''}
-      </div>
-    </div>
-
-    <!-- INFO CARDS -->
-    <div style="padding:16px 22px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f7fc;border-bottom:1px solid #e7e6f4">
-      <div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">FUNIL</div>
-        <div style="font-size:20px;font-weight:800;color:#1E1E5C">${statusLabel(l.status)||'Novo Lead'}</div>
-        <div style="font-size:11px;color:#7878A8;margin-top:2px">Etapa atual do lead</div>
-      </div>
-      <div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">TELEFONE</div>
-        <div style="font-size:20px;font-weight:800;color:#1E1E5C">${l.tel?fmtTel(l.tel):'—'}</div>
-        <div style="font-size:11px;color:#7878A8;margin-top:2px">Contato principal</div>
-      </div>
-      ${l.cidade?`<div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">ENDEREÇO</div>
-        <div style="font-size:14px;font-weight:700;color:#1E1E5C">${esc(l.cidade)}</div>
-        <div style="font-size:11px;color:#7878A8;margin-top:2px">Cidade / UF</div>
-      </div>`:''}
-      ${l.responsavel?`<div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">RESPONSÁVEL</div>
-        <div style="font-size:14px;font-weight:700;color:#1E1E5C">${esc(l.responsavel)}</div>
-        <div style="font-size:11px;color:#7878A8;margin-top:2px">Vendedor responsável</div>
-      </div>`:''}
-    </div>`:''}
-
-    <div class="crm-modal-body">
-      <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">CADASTRO E EDIÇÃO</div>
-      <div class="crm-form-row">
-        <div><label class="crm-label">Empresa / Razão Social *</label>
-          <input type="text" class="crm-inp" id="crm-f-empresa" value="${esc(l?.empresa||'')}" placeholder="Empresa SST Ltda"></div>
-        <div><label class="crm-label">Nome do Contato</label>
-          <input type="text" class="crm-inp" id="crm-f-nome" value="${esc(l?.nome||'')}" placeholder="João da Silva"></div>
-      </div>
-      <div class="crm-form-row3">
-        <div><label class="crm-label">CNPJ</label>
-          <input type="text" class="crm-inp" id="crm-f-cnpj" value="${esc(l?.cnpj||'')}" placeholder="00.000.000/0001-00"></div>
-        <div><label class="crm-label">Telefone / WhatsApp</label>
-          <input type="text" class="crm-inp" id="crm-f-tel" value="${esc(l?.tel||'')}" placeholder="(11) 99999-9999"></div>
-        <div><label class="crm-label">E-mail</label>
-          <input type="email" class="crm-inp" id="crm-f-email" value="${esc(l?.email||'')}" placeholder="contato@empresa.com.br"></div>
-      </div>
-      <div class="crm-form-row">
-        <div><label class="crm-label">Cidade / UF</label>
-          <input type="text" class="crm-inp" id="crm-f-cidade" value="${esc(l?.cidade||'')}" placeholder="São Paulo – SP"></div>
-        <div><label class="crm-label">Segmento / Atividade</label>
-          <input type="text" class="crm-inp" id="crm-f-segmento" value="${esc(l?.segmento||'')}" placeholder="Metalurgia, Construção..."></div>
-      </div>
-      <div style="height:1px;background:#e7e6f4;margin:14px 0"></div>
-      <div class="crm-form-row3">
-        <div><label class="crm-label">Etapa do Funil</label>
-          <select class="crm-sel" id="crm-f-status">${colOpts}</select></div>
-        <div><label class="crm-label">Prioridade</label>
-          <select class="crm-sel" id="crm-f-prioridade">
-            <option value="baixa" ${l?.prioridade==='baixa'||!l?.prioridade?'selected':''}>🟢 Baixa</option>
-            <option value="media" ${l?.prioridade==='media'?'selected':''}>🟡 Média</option>
-            <option value="alta"  ${l?.prioridade==='alta'?'selected':''}>🔴 Alta</option>
-          </select></div>
-        <div><label class="crm-label">Responsável</label>
-          <select class="crm-sel" id="crm-f-resp">
-            <option value="">— Sem responsável —</option>
-            <option ${l?.responsavel==='Gustavo C.'?'selected':''}>Gustavo C.</option>
-            <option ${l?.responsavel==='Giulia B.'?'selected':''}>Giulia B.</option>
-            <option ${l?.responsavel==='Larissa P.'?'selected':''}>Larissa P.</option>
-          </select></div>
-      </div>
-      <div class="crm-form-row">
-        <div><label class="crm-label">Valor Estimado (R$)</label>
-          <input type="number" class="crm-inp" id="crm-f-valor" value="${l?.valor||''}" placeholder="0" min="0"></div>
-        <div><label class="crm-label">Nº de Funcionários</label>
-          <input type="number" class="crm-inp" id="crm-f-func" value="${l?.funcionarios||''}" placeholder="0" min="0"></div>
-      </div>
-      <div class="crm-form-row">
-        <div><label class="crm-label">Próxima Ação</label>
-          <input type="text" class="crm-inp" id="crm-f-proxacao" value="${esc(l?.proxAcao||'')}" placeholder="Enviar proposta, ligar..."></div>
-        <div><label class="crm-label">Data da Próxima Ação</label>
-          <input type="date" class="crm-inp" id="crm-f-proxdata" value="${l?.proxAcaoTs?new Date(l.proxAcaoTs).toISOString().slice(0,10):''}"></div>
-      </div>
-      <div style="height:1px;background:#e7e6f4;margin:14px 0"></div>
-      <div class="crm-form-full">
-        <label class="crm-label">Aba do CRM</label>
-        <select class="crm-sel" id="crm-f-tab" style="max-width:220px">${tabOpts}</select>
-        <div style="font-size:11px;color:#7878A8;margin-top:4px">Mover este lead para outra aba ao salvar</div>
-      </div>
-      <div class="crm-form-full">
-        <label class="crm-label">Serviços de Interesse</label>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${svcChecks}</div>
-      </div>
-      <div class="crm-form-full">
-        <label class="crm-label">Observações / Notas</label>
-        <textarea class="crm-ta" id="crm-f-obs" rows="3" placeholder="Anotações sobre este lead...">${esc(l?.obs||'')}</textarea>
-      </div>
-      ${!isNew&&(l?.historico||[]).length?`
-        <div style="height:1px;background:#e7e6f4;margin:14px 0"></div>
-        <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px">LINHA DO TEMPO</div>
-        <div class="crm-timeline">${timeline}</div>
-      `:''}
-    </div>
-    <div class="crm-modal-footer">
-      ${!isNew?`<button class="crm-btn crm-btn-danger" onclick="crmDelLead('${l.id}','${tab}',true)">🗑 Excluir</button>`:''}
-      <div style="flex:1"></div>
-      <button class="crm-btn" onclick="crmCloseModal()">Cancelar</button>
-      <button class="crm-btn crm-btn-primary" onclick="crmSaveLead('${l?.id||''}','${tab}')">
-        ${isNew?'+ Criar Lead':'💾 Salvar CRM'}
-      </button>
-    </div>`;
-}
-
-// ── Save lead ──
-function crmSaveLead(existingId, tab) {
-  tab = tab || activeTab;
-  const empresa = document.getElementById('crm-f-empresa')?.value?.trim();
-  const nome    = document.getElementById('crm-f-nome')?.value?.trim();
-  if (!empresa && !nome) { alert('Informe a empresa ou nome do contato.'); return; }
-
-  const proxDataVal = document.getElementById('crm-f-proxdata')?.value;
-  const proxAcaoTs  = proxDataVal ? new Date(proxDataVal).getTime() : null;
-  const servicos    = Array.from(document.querySelectorAll('input[name="crm-svc"]:checked')).map(el=>el.value);
-  const destTab     = document.getElementById('crm-f-tab')?.value || tab;
-  const newStatus   = document.getElementById('crm-f-status')?.value;
-
-  crmLoad();
-
-  if (existingId) {
-    // Find in source tab
-    const srcIdx = (crmData[tab]||[]).findIndex(l=>l.id===existingId);
-    if (srcIdx !== -1) {
-      const old  = crmData[tab][srcIdx];
-      const hist = [...(old.historico||[])];
-      if (old.status !== newStatus) hist.push({ type:'status', title:`Movido para "${statusLabel(newStatus)}"`, ts:Date.now() });
-      const nota = document.getElementById('crm-f-obs')?.value?.trim();
-      if (nota && nota !== old.obs) hist.push({ type:'nota', title:'Observação atualizada', note:nota.slice(0,100), ts:Date.now() });
-
-      const updated = { ...old, empresa, nome,
-        cnpj: document.getElementById('crm-f-cnpj')?.value?.trim(),
-        tel:  document.getElementById('crm-f-tel')?.value?.trim(),
-        email:document.getElementById('crm-f-email')?.value?.trim(),
-        cidade:document.getElementById('crm-f-cidade')?.value?.trim(),
-        segmento:document.getElementById('crm-f-segmento')?.value?.trim(),
-        status: newStatus,
-        prioridade:  document.getElementById('crm-f-prioridade')?.value,
-        responsavel: document.getElementById('crm-f-resp')?.value,
-        valor:        parseFloat(document.getElementById('crm-f-valor')?.value)||0,
-        funcionarios: parseInt(document.getElementById('crm-f-func')?.value)||0,
-        proxAcao: document.getElementById('crm-f-proxacao')?.value?.trim(),
-        proxAcaoTs, servicos, obs: document.getElementById('crm-f-obs')?.value?.trim(),
-        historico: hist, atualizadoEm: Date.now(),
-      };
-
-      if (destTab !== tab) {
-        // Move to different tab
-        crmData[tab].splice(srcIdx, 1);
-        if (!crmData[destTab]) crmData[destTab] = [];
-        crmData[destTab].unshift(updated);
-      } else {
-        crmData[tab][srcIdx] = updated;
-      }
-    }
-  } else {
-    const newLead = {
-      id: uid(), empresa, nome,
-      cnpj:  document.getElementById('crm-f-cnpj')?.value?.trim(),
-      tel:   document.getElementById('crm-f-tel')?.value?.trim(),
-      email: document.getElementById('crm-f-email')?.value?.trim(),
-      cidade:document.getElementById('crm-f-cidade')?.value?.trim(),
-      segmento:document.getElementById('crm-f-segmento')?.value?.trim(),
-      status: newStatus,
-      prioridade:  document.getElementById('crm-f-prioridade')?.value,
-      responsavel: document.getElementById('crm-f-resp')?.value,
-      valor:        parseFloat(document.getElementById('crm-f-valor')?.value)||0,
-      funcionarios: parseInt(document.getElementById('crm-f-func')?.value)||0,
-      proxAcao: document.getElementById('crm-f-proxacao')?.value?.trim(),
-      proxAcaoTs, servicos, obs: document.getElementById('crm-f-obs')?.value?.trim(),
-      historico:[{type:'criado',title:'Lead criado',ts:Date.now()}],
-      criadoEm: Date.now(), atualizadoEm: Date.now(),
-    };
-    if (!crmData[destTab]) crmData[destTab] = [];
-    crmData[destTab].unshift(newLead);
-  }
-
-  crmSave();
-  crmCloseModal();
-  // Render both source and dest tabs
-  crmRenderTab(tab);
-  if (destTab !== tab) { crmRenderTab(destTab); crmSetTab(destTab); }
-}
-window.crmSaveLead = crmSaveLead;
-
-// ── Delete lead ──
-function crmDelLead(id, tab, fromModal) {
-  tab = tab || activeTab;
-  if (!confirm('Excluir este lead?')) return;
-  crmLoad();
-  crmData[tab] = (crmData[tab]||[]).filter(l=>l.id!==id);
-  crmSave();
-  if (fromModal) crmCloseModal();
-  crmRenderTab(tab);
-}
-window.crmDelLead = crmDelLead;
-
-// ── Quick status advance ──
-function crmQuickStatus(id, tab) {
-  tab = tab || activeTab;
-  crmLoad();
-  const l = (crmData[tab]||[]).find(x=>x.id===id);
-  if (!l) return;
-  const idx  = crmCols.findIndex(c=>c.id===l.status);
-  const next = crmCols[(idx+1) % crmCols.length];
-  l.status = next.id;
-  l.historico = [...(l.historico||[]),{type:'status',title:`Movido para "${next.label}"`,ts:Date.now()}];
-  l.atualizadoEm = Date.now();
-  crmSave();
-  crmRenderTab(tab);
-}
-window.crmQuickStatus = crmQuickStatus;
-
-// ── Quick status direct (from modal action buttons) ──
-function crmQuickStatusDirect(id, tab, newStatus) {
-  crmLoad();
-  const list = crmData[tab] || [];
-  const l = list.find(x => x.id === id);
-  if (!l) return;
-  l.status = newStatus;
-  l.atualizadoEm = Date.now();
-  l.historico = l.historico || [];
-  const labels = {novo:'Novo lead',contato:'Sem contato',proposta:'Proposta enviada',negociacao:'Em negociação',fechado:'Fechado',perdido:'Sem interesse'};
-  l.historico.push({ type:'status', title:`Status: ${labels[newStatus]||newStatus}`, ts: Date.now() });
-  crmSave();
-  crmCloseModal();
-  crmRenderTab(tab);
+    '</div>'
+  ].join('');
 }
 window.crmQuickStatusDirect = crmQuickStatusDirect;
 
