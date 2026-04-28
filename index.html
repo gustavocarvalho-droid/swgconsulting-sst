@@ -988,7 +988,7 @@
     .crm-board::-webkit-scrollbar-thumb { background:#c2bfe0; border-radius:3px; }
 
     .crm-col {
-      min-width:250px; max-width:280px; flex-shrink:0;
+      min-width:290px; max-width:330px; flex-shrink:0;
       background:#f0eff8; border-radius:12px; border:1px solid #e0dfef;
       display:flex; flex-direction:column; max-height:calc(100vh - 280px);
     }
@@ -1012,17 +1012,13 @@
 
     /* LEAD CARD */
     .crm-lead-card {
-      background:#ffffff; border:1px solid #e0dfef; border-radius:10px;
-      padding:10px 11px; cursor:pointer; transition:all .15s;
-      position:relative; overflow:hidden;
+      background:#0f0f2e; border:1px solid rgba(255,255,255,.08); border-radius:14px;
+      padding:16px; transition:all .15s; position:relative; overflow:hidden;
     }
-    .crm-lead-card:hover { border-color:#7176b7; box-shadow:0 2px 10px rgba(30,30,92,.1); transform:translateY(-1px); }
-    .crm-lead-card.priority-alta::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#A32D2D; }
-    .crm-lead-card.priority-media::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#854F0B; }
-    .crm-lead-card.priority-baixa::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#3B6D11; }
-    .crm-card-actions { opacity:0; transition:opacity .15s; }
-    .crm-lead-card:hover .crm-card-actions { opacity:1; }
-    @media (hover:none) { .crm-card-actions { opacity:1; } }
+    .crm-lead-card:hover { border-color:rgba(255,255,255,.18); box-shadow:0 4px 20px rgba(0,0,0,.3); transform:translateY(-2px); }
+    .crm-lead-card.priority-alta::before   { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#A32D2D; border-radius:14px 14px 0 0; }
+    .crm-lead-card.priority-media::before  { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#854F0B; border-radius:14px 14px 0 0; }
+    .crm-lead-card.priority-baixa::before  { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#3a4096; border-radius:14px 14px 0 0; }
     .crm-lead-name { font-size:13px; font-weight:700; color:#1E1E5C; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .crm-lead-empresa { font-size:11px; color:#5B5BAA; font-weight:500; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .crm-lead-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
@@ -10921,79 +10917,99 @@ function crmRenderKanban(tab) {
 // ── Lead card HTML ──
 function crmLeadCard(l, tab) {
   const colors = ['#3a4096','#185FA5','#3B6D11','#854F0B','#A32D2D','#6B3A9E','#0D7A6E','#B5471F'];
-  const bg     = colors[(l.empresa||l.nome||'A').charCodeAt(0) % colors.length];
-  const ini    = initials(l.empresa||l.nome||'?');
-  const tel    = (l.tel||'').replace(/\D/g,'');
-  const telFull= tel && !tel.startsWith('55') ? '55'+tel : tel;
-  const now    = Date.now();
-  const dias   = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/86400000);
+  const bg  = colors[(l.empresa||l.nome||'A').charCodeAt(0) % colors.length];
+  const ini = initials(l.empresa||l.nome||'?');
+  const tel = (l.tel||'').replace(/\D/g,'');
+  const telFull = tel && !tel.startsWith('55') ? '55'+tel : tel;
+  const now  = Date.now();
+  const dias = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/86400000);
 
   // Status badge
   const statusMap = {
-    novo:       {label:'Novo Lead',       color:'#1E1E5C', bg:'#eef0fa'},
-    contato:    {label:'Sem Contato',     color:'#854F0B', bg:'#fef3e2'},
-    proposta:   {label:'Proposta',        color:'#185FA5', bg:'#e8f0fb'},
-    negociacao: {label:'Negociação',      color:'#3B6D11', bg:'#eaf3de'},
-    fechado:    {label:'Fechado ✓',       color:'#3B6D11', bg:'#eaf3de'},
-    perdido:    {label:'Sem Interesse',   color:'#A32D2D', bg:'#fcebeb'},
+    novo:       {label:'Novo lead',     c:'#1E1E5C', bg:'#eef0fa'},
+    contato:    {label:'Sem Contato',   c:'#854F0B', bg:'#fef3e2'},
+    proposta:   {label:'Proposta',      c:'#185FA5', bg:'#e8f0fb'},
+    negociacao: {label:'Negociação',    c:'#3B6D11', bg:'#eaf3de'},
+    fechado:    {label:'Fechado ✓',     c:'#3B6D11', bg:'#eaf3de'},
+    perdido:    {label:'Sem Interesse', c:'#A32D2D', bg:'#fcebeb'},
   };
-  const st = statusMap[l.status] || {label: l.status||'Novo', color:'#7878A8', bg:'#f0eff8'};
-
-  // Urgency dot
-  const urgDot = dias>14 ? '🔴' : dias>7 ? '🟡' : '';
+  const st = statusMap[l.status] || {label:l.status||'Novo', c:'#7878A8', bg:'#f0eff8'};
 
   // Last note
   const hist = l.historico||[];
   const last = hist[hist.length-1];
 
-  // GMB URL
-  const gmb = 'https://www.google.com/search?q=' + encodeURIComponent((l.empresa||l.nome||'') + ' ' + (l.cidade||''));
+  // Urgency
+  const urgDot = dias>14 ? ' 🔴' : dias>7 ? ' 🟡' : '';
 
-  return [
-    '<div class="crm-lead-card priority-'+(l.prioridade||'baixa')+'" style="cursor:pointer" onclick="crmOpenLead(\''+l.id+'\',\''+tab+'\')">',
+  // GMB
+  const gmb = 'https://www.google.com/search?q='+encodeURIComponent((l.empresa||l.nome||'')+' '+(l.cidade||''));
 
-    // ── Header: avatar + nome + status ──
-    '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">',
-      '<div style="width:40px;height:40px;min-width:40px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff">'+ini+'</div>',
-      '<div style="flex:1;min-width:0">',
-        '<div style="font-size:14px;font-weight:800;color:#1E1E5C;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(l.empresa||l.nome||'—')+(urgDot?' '+urgDot:'')+'</div>',
-        '<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;background:'+st.bg+';color:'+st.color+'">'+st.label+'</span>',
+  const parts = [
+    // ── HEADER: avatar + status + "Notas" badge ──
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">',
+      '<div style="width:46px;height:46px;min-width:46px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">'+ini+'</div>',
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">',
+        '<span style="padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:'+st.bg+';color:'+st.c+'">'+st.label+'</span>',
+        last ? '<span style="padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;background:#f0eff8;color:#5B5BAA;cursor:pointer" onclick="event.stopPropagation();crmOpenLead(\''+l.id+'\',\''+tab+'\')">Notas</span>' : '',
       '</div>',
     '</div>',
 
-    // ── Info row ──
-    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;color:#7878A8">',
-      l.cidade ? '<span>📍 '+esc(l.cidade)+'</span>' : '',
-      l.responsavel ? '<span>👤 '+esc(l.responsavel.split(' ')[0])+'</span>' : '',
-      l.valor ? '<span style="color:#3B6D11;font-weight:700">'+fmtVal(l.valor)+'</span>' : '',
-    '</div>',
+    // ── NOME DA EMPRESA ──
+    '<div style="font-size:16px;font-weight:800;color:#1E1E5C;line-height:1.3;margin-bottom:6px">'+esc(l.empresa||l.nome||'—')+urgDot+'</div>',
 
-    // ── Last note ──
-    last ? '<div style="font-size:11px;color:#5B5BAA;padding:5px 9px;background:#f8f7fc;border-radius:6px;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">💬 '+esc(last.title)+'</div>' : '',
+    // ── SEGMENTO ──
+    l.segmento ? '<div style="font-size:12px;color:#7878A8;margin-bottom:8px">'+esc(l.segmento)+'</div>' : '',
 
-    // ── Action buttons ──
-    '<div style="display:flex;gap:5px;align-items:center" onclick="event.stopPropagation()">',
-      // Checkbox selecionar
-      '<input type="checkbox" id="crm-sel-'+l.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#3a4096;flex-shrink:0" onclick="crmToggleSelect(\''+l.id+'\',\''+tab+'\',this)" title="Selecionar">',
+    // ── CIDADE ──
+    l.cidade ? '<div style="font-size:12px;color:#7878A8;margin-bottom:6px">📍 '+esc(l.cidade)+'</div>' : '',
+
+    // ── RESPONSÁVEL ──
+    l.responsavel ? '<div style="font-size:12px;color:#5B5BAA;margin-bottom:6px">Usuário: '+esc(l.responsavel)+'</div>' : '',
+
+    // ── VALOR ──
+    l.valor ? '<div style="font-size:12px;font-weight:700;color:#3B6D11;margin-bottom:6px">💰 '+fmtVal(l.valor)+'</div>' : '',
+
+    // ── PRÓXIMA AÇÃO ──
+    l.proxAcao ? '<div style="font-size:12px;color:#854F0B;margin-bottom:6px">📅 '+esc(l.proxAcao)+'</div>' : '',
+
+    // ── ÚLTIMA NOTA ──
+    last ? [
+      '<div style="background:#1a1a3e;border-radius:10px;padding:12px 14px;margin:10px 0">',
+        '<div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px">'+esc(last.title||last.type||'Atualização')+'</div>',
+        '<div style="font-size:11px;color:rgba(255,255,255,.5)">'+fmtDate(last.ts)+'</div>',
+      '</div>'
+    ].join('') : '',
+
+    // ── BOTÕES ──
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px" onclick="event.stopPropagation()">',
+
+      // Selecionar
+      '<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid #e0dfef;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:#5B5BAA;background:#f8f7fc">',
+        '<input type="checkbox" id="crm-sel-'+l.id+'" style="width:15px;height:15px;accent-color:#3a4096" onclick="crmToggleSelect(\''+l.id+'\',\''+tab+'\',this)">',
+        'Selecionar',
+      '</label>',
 
       // Ligar
-      tel ? '<a href="tel:+'+telFull+'" style="flex:1;padding:6px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px" title="Ligar">📞 Ligar</a>'
-          : '<div style="flex:1"></div>',
+      tel ? '<a href="tel:+'+telFull+'" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;background:#fff;border:1.5px solid #e0dfef;border-radius:8px;font-size:12px;font-weight:700;color:#1E1E5C;text-decoration:none">📞 Ligação hoje</a>' : '',
 
-      // GMB
-      '<a href="'+gmb+'" target="_blank" style="flex:1;padding:6px;background:#e7e6f4;color:#3a4096;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px" title="Google Meu Negócio">🗺️ GMB</a>',
+      // Google Meu Negócio
+      '<a href="'+gmb+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;background:#fff;border:1.5px solid #e0dfef;border-radius:8px;font-size:12px;font-weight:700;color:#1E1E5C;text-decoration:none">🗺️ Google Meu Negócio</a>',
 
-      // Abrir
-      '<button style="flex:1;padding:6px;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();crmOpenLead(\''+l.id+'\',\''+tab+'\')">Abrir</button>',
+      // WhatsApp (if has tel)
+      tel ? '<a href="https://wa.me/'+telFull+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;background:#e8f5e9;border:1.5px solid #25D366;border-radius:8px;font-size:12px;font-weight:700;color:#1a7a46;text-decoration:none">💬 WhatsApp</a>' : '',
 
-      // Excluir
-      '<button style="padding:6px 8px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:12px;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();crmDelLead(\''+l.id+'\',\''+tab+'\')" title="Excluir">🗑</button>',
+      // Abrir lead + Excluir
+      '<div style="display:grid;grid-template-columns:1fr auto;gap:6px">',
+        '<button style="padding:10px;background:#3a4096;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" onclick="crmOpenLead(\''+l.id+'\',\''+tab+'\')">Abrir lead</button>',
+        '<button style="padding:10px 13px;background:#f8f7fc;color:#A32D2D;border:1.5px solid #f0d0d0;border-radius:8px;font-size:13px;cursor:pointer" onclick="crmDelLead(\''+l.id+'\',\''+tab+'\')" title="Excluir lead">🗑</button>',
+      '</div>',
+
     '</div>',
+  ];
 
-    '</div>'
-  ].join('');
+  return '<div class="crm-lead-card priority-'+(l.prioridade||'baixa')+'" style="cursor:default">'+parts.join('')+'</div>';
 }
-
 // ── Quick status direct (action buttons in modal) ──
 function crmQuickStatusDirect(id, tab, newStatus) {
   crmLoad();
