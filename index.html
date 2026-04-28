@@ -1062,7 +1062,7 @@
     @keyframes crmFadeIn { from{opacity:0} to{opacity:1} }
     .crm-modal {
       background:#ffffff; border:1px solid #c2bfe0; border-radius:16px;
-      width:min(600px,96vw); max-height:92vh; overflow-y:auto;
+      width:min(860px,96vw); max-height:95vh; overflow-y:auto;
       box-shadow:0 20px 60px rgba(30,30,92,.2); animation:crmSlideUp .2s;
     }
     @keyframes crmSlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -5186,7 +5186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @keyframes crmFadeIn { from{opacity:0} to{opacity:1} }
     .crm-modal {
       background:#ffffff; border:1px solid #c2bfe0; border-radius:16px;
-      width:min(600px,96vw); max-height:92vh; overflow-y:auto;
+      width:min(860px,96vw); max-height:95vh; overflow-y:auto;
       box-shadow:0 20px 60px rgba(30,30,92,.2); animation:crmSlideUp .2s;
     }
     @keyframes crmSlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -11148,107 +11148,175 @@ function crmRenderLeadModal(l, tab, isNew) {
   const telFull = tel && !tel.startsWith('55') ? '55'+tel : tel;
 
   const html = `
-    <div style="background:#0D0D2E;padding:20px 22px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:12px">
-      <div style="width:44px;height:44px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
+    <!-- HEADER ESCURO -->
+    <div style="background:linear-gradient(135deg,#0D0D2E,#1a1a4e);padding:22px 28px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px">
+      <div style="width:52px;height:52px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.3)">${ini}</div>
       <div style="flex:1">
-        <div style="font-size:18px;font-weight:800;color:#fff">${isNew?'+ Novo Lead':esc(l.empresa||l.nome||'Lead')}</div>
-        ${!isNew&&l.cidade?`<div style="font-size:12px;color:rgba(255,255,255,.5)">${esc(l.cidade)}</div>`:''}
+        <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2">${isNew?'+ Novo Lead':esc(l.empresa||l.nome||'Lead')}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap">
+          ${l.cidade?`<span>📍 ${esc(l.cidade)}</span>`:''}
+          ${l.segmento?`<span>🏷 ${esc(l.segmento)}</span>`:''}
+          ${l.cnpj?`<span>📋 ${esc(l.cnpj)}</span>`:''}
+        </div>
       </div>
-      <button onclick="crmCloseModal()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:24px;cursor:pointer;line-height:1;padding:0">×</button>
+      <button onclick="crmCloseModal()" style="background:rgba(255,255,255,.1);border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;padding:6px 10px;border-radius:8px">×</button>
     </div>
 
     ${!isNew?`
-    <div style="padding:14px 22px;background:#f8f7fc;border-bottom:1px solid #e7e6f4;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      ${['novo','contato','proposta','negociacao','fechado','perdido'].map(s => {
-        const labels = {novo:'Novo Lead',contato:'Sem Contato',proposta:'Proposta',negociacao:'Negociação',fechado:'Fechado ✓',perdido:'Sem Interesse'};
-        const active = l.status === s;
-        return `<button onclick="crmQuickStatusDirect('${l.id}','${tab}','${s}')"
-          style="padding:5px 12px;border-radius:999px;border:1.5px solid ${active?'#1E1E5C':'#c2bfe0'};background:${active?'#1E1E5C':'#fff'};color:${active?'#fff':'#5B5BAA'};font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">${labels[s]}</button>`;
-      }).join('')}
-      <div style="flex:1"></div>
-      ${tel?`<a href="tel:+${telFull}" style="padding:6px 14px;background:#eaf3de;color:#3B6D11;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">📞 Ligar</a>`:''}
-      ${tel?`<a href="https://wa.me/${telFull}" target="_blank" style="padding:6px 14px;background:#e8f5e9;color:#1a7a46;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">💬 WhatsApp</a>`:''}
-      <a href="${gmbUrl}" target="_blank" style="padding:6px 14px;background:#e7e6f4;color:#3a4096;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:5px">🗺️ GMB</a>
-    </div>`:''}
+    <!-- AÇÕES RÁPIDAS + CONTATOS -->
+    <div style="background:#f0eff8;padding:14px 28px;border-bottom:1px solid #e0dfef">
+      <!-- Status buttons -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${['novo','contato','proposta','negociacao','fechado','perdido'].map(s => {
+          const labels={novo:'Novo Lead',contato:'Sem Contato',proposta:'Proposta',negociacao:'Negociação',fechado:'Fechado ✓',perdido:'Sem Interesse'};
+          const active = l.status===s;
+          return `<button onclick="crmQuickStatusDirect('${l.id}','${tab}','${s}')"
+            style="padding:6px 14px;border-radius:999px;border:1.5px solid ${active?'#1E1E5C':'#c2bfe0'};background:${active?'#1E1E5C':'#fff'};color:${active?'#fff':'#5B5BAA'};font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s">${labels[s]}</button>`;
+        }).join('')}
+      </div>
+      <!-- Contact quick actions -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${tel?`<a href="tel:+${telFull}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#eaf3de;color:#3B6D11;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;border:1px solid #b8dfa0">📞 Ligar</a>`:''}
+        ${tel?`<a href="https://wa.me/${telFull}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#e8f5e9;color:#1a7a46;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;border:1px solid #25D36644">💬 WhatsApp</a>`:''}
+        <a href="${gmbUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#e7e6f4;color:#3a4096;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;border:1px solid #c2bfe0">🗺️ Google Meu Negócio</a>
+      </div>
+    </div>`:``}
 
-    <div style="padding:20px 22px;overflow-y:auto;max-height:60vh">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Empresa / Razão Social *</label>
+    <!-- CORPO DO FORMULÁRIO -->
+    <div style="padding:24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+      <!-- COLUNA ESQUERDA -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="font-size:11px;font-weight:800;color:#3a4096;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;padding-bottom:8px;border-bottom:2px solid #e7e6f4">📋 Dados da Empresa</div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Empresa / Razão Social *</label>
           <input type="text" id="crm-f-empresa" value="${esc(l.empresa||'')}" placeholder="Nome da empresa"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Nome do Contato</label>
-          <input type="text" id="crm-f-nome" value="${esc(l.nome||'')}" placeholder="Nome do responsável"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">CNPJ</label>
+            style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:14px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+            onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Nome do Contato</label>
+          <input type="text" id="crm-f-nome" value="${esc(l.nome||'')}" placeholder="Responsável na empresa"
+            style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:14px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+            onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">CNPJ</label>
           <input type="text" id="crm-f-cnpj" value="${esc(l.cnpj||'')}" placeholder="00.000.000/0001-00"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Telefone / WhatsApp</label>
-          <input type="text" id="crm-f-tel" value="${esc(l.tel||'')}" placeholder="(11) 99999-9999"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">E-mail</label>
-          <input type="email" id="crm-f-email" value="${esc(l.email||'')}" placeholder="contato@empresa.com"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
+            style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:14px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+            onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Telefone</label>
+            <input type="text" id="crm-f-tel" value="${esc(l.tel||'')}" placeholder="(11) 99999-9999"
+              style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+              onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">E-mail</label>
+            <input type="email" id="crm-f-email" value="${esc(l.email||'')}" placeholder="contato@empresa.com"
+              style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+              onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Cidade / UF</label>
+            <input type="text" id="crm-f-cidade" value="${esc(l.cidade||'')}" placeholder="São Paulo – SP"
+              style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+              onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Segmento</label>
+            <input type="text" id="crm-f-segmento" value="${esc(l.segmento||'')}" placeholder="Ex: Construção..."
+              style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+              onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Observações / Notas</label>
+          <textarea id="crm-f-obs" rows="4" placeholder="Anotações sobre este lead, histórico de contatos..."
+            style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;resize:vertical;background:#fafafa;line-height:1.5"
+            onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">${esc(l.obs||'')}</textarea>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Cidade / UF</label>
-          <input type="text" id="crm-f-cidade" value="${esc(l.cidade||'')}" placeholder="São Paulo – SP"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Segmento</label>
-          <input type="text" id="crm-f-segmento" value="${esc(l.segmento||'')}" placeholder="Ex: Construção, Saúde..."
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Etapa do Funil</label>
-          <select id="crm-f-status" style="width:100%;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fff">${colOpts}</select></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Prioridade</label>
-          <select id="crm-f-prioridade" style="width:100%;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fff">
-            <option value="baixa" ${l.prioridade==='baixa'||!l.prioridade?'selected':''}>🟢 Baixa</option>
-            <option value="media" ${l.prioridade==='media'?'selected':''}>🟡 Média</option>
-            <option value="alta"  ${l.prioridade==='alta'?'selected':''}>🔴 Alta</option>
-          </select></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Responsável</label>
-          <select id="crm-f-resp" style="width:100%;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fff">
-            <option value="" ${!l.responsavel?'selected':''}>— Sem responsável —</option>
-            <option ${l.responsavel==='Gustavo C.'?'selected':''}>Gustavo C.</option>
-            <option ${l.responsavel==='Giulia B.'?'selected':''}>Giulia B.</option>
-            <option ${l.responsavel==='Larissa P.'?'selected':''}>Larissa P.</option>
-          </select></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Valor Estimado (R$)</label>
-          <input type="number" id="crm-f-valor" value="${l.valor||''}" placeholder="0" min="0"
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-        <div><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Próxima Ação</label>
-          <input type="text" id="crm-f-proxacao" value="${esc(l.proxAcao||'')}" placeholder="Ligar, enviar proposta..."
-            style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'"></div>
-      </div>
-      <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Aba do CRM</label>
-        <select id="crm-f-tab" style="max-width:220px;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fff">${tabOpts}</select>
-      </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:8px;text-transform:uppercase">Serviços de Interesse</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">${svcChecks}</div>
-      </div>
-      <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase">Observações</label>
-        <textarea id="crm-f-obs" rows="3" placeholder="Anotações sobre este lead..."
-          style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid #e0dfef;border-radius:8px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;resize:vertical" onfocus="this.style.borderColor='#3a4096'" onblur="this.style.borderColor='#e0dfef'">${esc(l.obs||'')}</textarea>
-      </div>
-      ${!isNew && hist.length ? `
-        <div style="margin-top:4px">
-          <div style="font-size:10px;font-weight:700;color:#7878A8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Linha do Tempo</div>
-          ${timeline}
+
+      <!-- COLUNA DIREITA -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="font-size:11px;font-weight:800;color:#3a4096;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;padding-bottom:8px;border-bottom:2px solid #e7e6f4">⚙️ Pipeline & Configuração</div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Etapa do Funil</label>
+          <select id="crm-f-status" style="width:100%;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:14px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa">${colOpts}</select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Prioridade</label>
+            <select id="crm-f-prioridade" style="width:100%;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa">
+              <option value="baixa" ${l.prioridade==='baixa'||!l.prioridade?'selected':''}>🟢 Baixa</option>
+              <option value="media" ${l.prioridade==='media'?'selected':''}>🟡 Média</option>
+              <option value="alta"  ${l.prioridade==='alta'?'selected':''}>🔴 Alta</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Responsável</label>
+            <select id="crm-f-resp" style="width:100%;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa">
+              <option value="" ${!l.responsavel?'selected':''}>— Sem responsável —</option>
+              <option ${l.responsavel==='Gustavo C.'?'selected':''}>Gustavo C.</option>
+              <option ${l.responsavel==='Giulia B.'?'selected':''}>Giulia B.</option>
+              <option ${l.responsavel==='Larissa P.'?'selected':''}>Larissa P.</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Valor Estimado (R$)</label>
+            <input type="number" id="crm-f-valor" value="${l.valor||''}" placeholder="0" min="0"
+              style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+              onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Aba do CRM</label>
+            <select id="crm-f-tab" style="width:100%;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa">${tabOpts}</select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Próxima Ação</label>
+          <input type="text" id="crm-f-proxacao" value="${esc(l.proxAcao||'')}" placeholder="Ligar, enviar proposta, agendar visita..."
+            style="width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-family:inherit;color:#1E1E5C;outline:none;background:#fafafa"
+            onfocus="this.style.borderColor='#3a4096';this.style.background='#fff'" onblur="this.style.borderColor='#e0dfef';this.style.background='#fafafa'">
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:700;color:#7878A8;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Serviços de Interesse</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">${svcChecks}</div>
+        </div>
+
+        ${!isNew && hist.length ? `
+        <div style="background:#f8f7fc;border-radius:10px;padding:14px;flex:1">
+          <div style="font-size:10px;font-weight:800;color:#3a4096;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">📅 Linha do Tempo</div>
+          <div style="max-height:180px;overflow-y:auto">${timeline}</div>
         </div>` : ''}
+      </div>
     </div>
 
-    <div style="padding:14px 22px;border-top:1px solid #e7e6f4;display:flex;gap:8px;align-items:center;background:#fff;border-radius:0 0 14px 14px">
-      ${!isNew?`<button onclick="crmDelLead('${l.id}','${tab}',true)" style="padding:8px 16px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Excluir</button>`:''}
+    <!-- FOOTER -->
+    <div style="padding:16px 28px;border-top:1px solid #e7e6f4;display:flex;gap:8px;align-items:center;background:#f8f7fc;border-radius:0 0 16px 16px">
+      ${!isNew?`<button onclick="crmDelLead('${l.id}','${tab}',true)" style="padding:9px 18px;background:#fff;color:#A32D2D;border:1.5px solid #f0d0d0;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Excluir</button>`:''}
       <div style="flex:1"></div>
-      <button onclick="crmCloseModal()" style="padding:8px 18px;background:#f8f7fc;color:#5B5BAA;border:1px solid #e0dfef;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>
-      <button onclick="crmSaveLead('${l.id}','${tab}',${isNew})" style="padding:8px 22px;background:#1E1E5C;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${isNew?'+ Criar Lead':'💾 Salvar'}</button>
-    </div>`;
-
+      <button onclick="crmCloseModal()" style="padding:9px 20px;background:#fff;color:#5B5BAA;border:1.5px solid #e0dfef;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>
+      <button onclick="crmSaveLead('${l.id}','${tab}',${isNew})" style="padding:9px 28px;background:#1E1E5C;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(30,30,92,.3)">${isNew?'+ Criar Lead':'💾 Salvar Lead'}</button>
+    </div>`
   crmShowModal(html);
 }
 window.crmRenderLeadModal = crmRenderLeadModal;
