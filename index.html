@@ -998,14 +998,17 @@
 
     /* LEAD CARD */
     .crm-lead-card {
-      background:#ffffff; border:1px solid #c2bfe0; border-radius:10px;
-      padding:13px 14px; cursor:pointer; transition:all .15s;
+      background:#ffffff; border:1px solid #e0dfef; border-radius:10px;
+      padding:10px 11px; cursor:pointer; transition:all .15s;
       position:relative; overflow:hidden;
     }
-    .crm-lead-card:hover { border-color:#7176b7; box-shadow:0 3px 12px rgba(30,30,92,.1); transform:translateY(-1px); }
+    .crm-lead-card:hover { border-color:#7176b7; box-shadow:0 2px 10px rgba(30,30,92,.1); transform:translateY(-1px); }
     .crm-lead-card.priority-alta::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#A32D2D; }
     .crm-lead-card.priority-media::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#854F0B; }
     .crm-lead-card.priority-baixa::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#3B6D11; }
+    .crm-card-actions { opacity:0; transition:opacity .15s; }
+    .crm-lead-card:hover .crm-card-actions { opacity:1; }
+    @media (hover:none) { .crm-card-actions { opacity:1; } }
     .crm-lead-name { font-size:13px; font-weight:700; color:#1E1E5C; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .crm-lead-empresa { font-size:11px; color:#5B5BAA; font-weight:500; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .crm-lead-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
@@ -1015,17 +1018,6 @@
     .crm-tag-pcmso { background:rgba(24,95,165,.1);  color:#185FA5; border:1px solid rgba(24,95,165,.2); }
     .crm-tag-ppra  { background:rgba(59,109,17,.1);  color:#3B6D11; border:1px solid rgba(59,109,17,.2); }
     .crm-tag-custom { background:#e7e6f4; color:#5B5BAA; border:1px solid #c2bfe0; }
-    .crm-lead-meta { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
-    .crm-lead-tel  { font-size:10px; color:#7878A8; }
-    .crm-lead-val  { font-size:11px; font-weight:700; color:#3B6D11; }
-    .crm-lead-date { font-size:10px; color:#7878A8; }
-    .crm-lead-footer { display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px solid #f0eff8; }
-    .crm-lead-resp { display:flex; align-items:center; gap:5px; font-size:10px; color:#7878A8; font-weight:500; }
-    .crm-lead-avatar { width:18px; height:18px; border-radius:50%; background:#e7e6f4; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#3a4096; flex-shrink:0; }
-    .crm-lead-actions { display:flex; gap:3px; opacity:0; transition:opacity .15s; }
-    .crm-lead-card:hover .crm-lead-actions { opacity:1; }
-    .crm-lead-action-btn { padding:3px 6px; background:#f0eff8; border:1px solid #c2bfe0; border-radius:5px; cursor:pointer; font-size:10px; color:#5B5BAA; transition:all .15s; }
-    .crm-lead-action-btn:hover { background:#e7e6f4; border-color:#7176b7; color:#3a4096; }
 
     /* EMPTY COL */
     .crm-col-empty { text-align:center; padding:24px 12px; color:#7878A8; font-size:12px; }
@@ -10459,58 +10451,72 @@ window.crmRenameEmpresa = crmRenameEmpresa;
 
 // ── KPI update for a tab ──
 function crmUpdKPIs(tab) {
-  const s   = tab[0]; // 'b', 'z', 'e'
-  const ls  = leads(tab);
+  const ls      = leads(tab);
+  const now     = Date.now();
+  const DAY     = 86400000;
   const total   = ls.length;
+  const ativos  = ls.filter(l=>l.status!=='fechado'&&l.status!=='perdido');
   const prop    = ls.filter(l=>l.status==='proposta').length;
   const neg     = ls.filter(l=>l.status==='negociacao').length;
   const fechado = ls.filter(l=>l.status==='fechado').length;
   const perdido = ls.filter(l=>l.status==='perdido').length;
-  const totalVal= ls.filter(l=>l.status==='fechado').reduce((a,l)=>a+(l.valor||0),0);
+  const pipeline= ativos.reduce((a,l)=>a+(l.valor||0),0);
   const conv    = total ? Math.round(fechado/total*100) : 0;
-  const prefix  = { buscador:'b', zap:'z', empresa:'e' }[tab];
-
-  // Funnel
-  const fn = id => document.getElementById('crm-fn-'+prefix+'-'+id);
-  if (fn('total'))  fn('total').textContent  = total;
-  if (fn('prop'))   fn('prop').textContent   = prop;
-  if (fn('neg'))    fn('neg').textContent    = neg;
-  if (fn('fechado'))fn('fechado').textContent= fechado;
+  const semContato = ls.filter(l=>l.status==='contato'||l.status==='novo').length;
+  const followUp= ls.filter(l=>l.proxAcaoTs && l.proxAcaoTs <= now+DAY && l.proxAcaoTs > now-DAY && l.status!=='fechado'&&l.status!=='perdido').length;
+  const urgentes = ls.filter(l=>{ const dias = (now-(l.atualizadoEm||l.criadoEm||now))/DAY; return dias>7 && l.status!=='fechado'&&l.status!=='perdido'; }).length;
 
   // Tab count badge
   const badge = document.getElementById('crm-tab-count-'+tab);
   if (badge) badge.textContent = total;
 
+  // Funnel
+  const prefix = { buscador:'b', zap:'z', empresa:'e' }[tab];
+  const fn = id => document.getElementById('crm-fn-'+prefix+'-'+id);
+  if (fn('total'))   fn('total').textContent   = total;
+  if (fn('prop'))    fn('prop').textContent    = prop;
+  if (fn('neg'))     fn('neg').textContent     = neg;
+  if (fn('fechado')) fn('fechado').textContent = fechado;
+
   // KPI cards
   const kpiWrap = document.getElementById('crm-kpis-'+tab);
   if (!kpiWrap) return;
   kpiWrap.innerHTML = `
-    <div class="crm-kpi" style="--kpi-color:#5B5BAA" onclick="crmFilterStatus('','${tab}')">
+    <div class="crm-kpi" style="--kpi-color:#5B5BAA" onclick="crmFilterQuick('','${tab}')">
       <div class="crm-kpi-val">${total}</div>
       <div class="crm-kpi-label">Total de Leads</div>
-      <div class="crm-kpi-pct" style="color:#7878A8">${total ? (total-fechado-perdido)+' ativos' : 'Pipeline ativo'}</div>
+      <div class="crm-kpi-pct" style="color:#7878A8">${ativos.length} ativos</div>
     </div>
-    <div class="crm-kpi" style="--kpi-color:#185FA5" onclick="crmFilterStatus('proposta','${tab}')">
-      <div class="crm-kpi-val">${prop}</div>
-      <div class="crm-kpi-label">Propostas Enviadas</div>
-      <div class="crm-kpi-pct" style="color:#185FA5">${total?Math.round(prop/total*100):0}% do total</div>
+    <div class="crm-kpi" style="--kpi-color:#185FA5" onclick="crmFilterQuick('pipeline','${tab}')">
+      <div class="crm-kpi-val" style="font-size:18px">${pipeline?fmtVal(pipeline):'R$ 0'}</div>
+      <div class="crm-kpi-label">Pipeline Total</div>
+      <div class="crm-kpi-pct" style="color:#185FA5">${prop} propostas · ${neg} negoc.</div>
     </div>
-    <div class="crm-kpi" style="--kpi-color:#854F0B" onclick="crmFilterStatus('negociacao','${tab}')">
-      <div class="crm-kpi-val">${neg}</div>
-      <div class="crm-kpi-label">Em Negociação</div>
-      <div class="crm-kpi-pct" style="color:#854F0B">${total?Math.round(neg/total*100):0}% do total</div>
+    <div class="crm-kpi" style="--kpi-color:#A32D2D" onclick="crmFilterQuick('urgentes','${tab}')">
+      <div class="crm-kpi-val" style="color:${urgentes>0?'#A32D2D':'#3B6D11'}">${urgentes}</div>
+      <div class="crm-kpi-label">Parados +7 dias</div>
+      <div class="crm-kpi-pct" style="color:${urgentes>0?'#A32D2D':'#7878A8'}">${urgentes>0?'⚠ Atenção necessária':'✓ Em dia'}</div>
+    </div>
+    <div class="crm-kpi" style="--kpi-color:#854F0B" onclick="crmFilterQuick('followup','${tab}')">
+      <div class="crm-kpi-val" style="color:${followUp>0?'#854F0B':'#7878A8'}">${followUp}</div>
+      <div class="crm-kpi-label">Follow-up Hoje</div>
+      <div class="crm-kpi-pct" style="color:#7878A8">${semContato} sem contato</div>
     </div>
     <div class="crm-kpi" style="--kpi-color:#3B6D11" onclick="crmFilterStatus('fechado','${tab}')">
       <div class="crm-kpi-val">${fechado}</div>
-      <div class="crm-kpi-label">Fechamentos</div>
-      <div class="crm-kpi-pct" style="color:#3B6D11">${totalVal ? fmtVal(totalVal) : 'R$ 0'}</div>
-    </div>
-    <div class="crm-kpi" style="--kpi-color:#A32D2D" onclick="crmFilterStatus('perdido','${tab}')">
-      <div class="crm-kpi-val">${perdido}</div>
-      <div class="crm-kpi-label">Perdidos</div>
-      <div class="crm-kpi-pct" style="color:#7878A8">${conv}% conversão</div>
+      <div class="crm-kpi-label">Fechados</div>
+      <div class="crm-kpi-pct" style="color:#3B6D11">${conv}% conversão</div>
     </div>`;
 }
+
+// ── Quick filter helper ──
+function crmFilterQuick(type, tab) {
+  tab = tab || activeTab;
+  const sel = document.getElementById('crm-fquick-'+tab);
+  if (sel) { sel.value = type; }
+  crmRenderTab(tab);
+}
+window.crmFilterQuick = crmFilterQuick;
 
 // ── Toolbar for a tab ──
 function crmRenderToolbar(tab) {
@@ -10539,6 +10545,7 @@ function crmRenderToolbar(tab) {
         <option value="valor">Maior valor</option>
         <option value="nome">A–Z</option>
         <option value="prox">Próxima ação</option>
+        <option value="parado">Mais parados</option>
       </select>
       <div class="crm-view-toggle">
         <button class="crm-view-btn ${crmViews[tab]==='kanban'?'active':''}" id="crm-vk-${tab}" onclick="crmSetView('kanban','${tab}')">
@@ -10550,7 +10557,14 @@ function crmRenderToolbar(tab) {
       </div>
       <button class="crm-btn crm-btn-sm" onclick="crmAddCol()">+ Coluna</button>
       <button class="crm-btn crm-btn-sm crm-btn-primary" onclick="crmOpenNew('novo','${tab}')">+ Lead</button>
-    </div>`;
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <span style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap">Filtros rápidos:</span>
+      ${[{v:'',l:'Todos'},{v:'urgentes',l:'⚠ Urgentes'},{v:'followup',l:'📅 Follow-up'},{v:'semcontato',l:'📵 Sem contato'},{v:'pipeline',l:'💰 Pipeline'}].map(f=>
+        `<button onclick="crmFilterQuick('${f.v}','${tab}')" style="padding:4px 12px;border-radius:999px;border:1px solid #c2bfe0;background:#fff;color:#5B5BAA;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" onmouseover="this.style.background='#e7e6f4'" onmouseout="this.style.background='#fff'">${f.l}</button>`
+      ).join('')}
+      <input type="hidden" id="crm-fquick-${tab}" value="">
+    </div>\`;
 }
 
 // ── Filtered leads for a tab ──
@@ -10559,20 +10573,28 @@ function crmFiltered(tab) {
   const st    = document.getElementById('crm-fstatus-'+tab)?.value||'';
   const resp  = document.getElementById('crm-fresp-'+tab)?.value||'';
   const prior = document.getElementById('crm-fprior-'+tab)?.value||'';
+  const quick = document.getElementById('crm-fquick-'+tab)?.value||'';
   const sort  = document.getElementById('crm-fsort-'+tab)?.value||'recent';
+  const now   = Date.now();
+  const DAY   = 86400000;
 
   let ls = (crmData[tab]||[]).filter(l => {
     if (srch  && !`${l.nome||''} ${l.empresa||''} ${l.cnpj||''} ${l.cidade||''} ${l.tel||''}`.toLowerCase().includes(srch)) return false;
-    if (st    && l.status    !== st)    return false;
-    if (resp  && l.responsavel !== resp) return false;
-    if (prior && l.prioridade !== prior) return false;
+    if (st    && l.status !== st)         return false;
+    if (resp  && l.responsavel !== resp)  return false;
+    if (prior && l.prioridade !== prior)  return false;
+    if (quick === 'urgentes') { const dias=(now-(l.atualizadoEm||l.criadoEm||now))/DAY; if(dias<=7||l.status==='fechado'||l.status==='perdido') return false; }
+    if (quick === 'followup') { if(!l.proxAcaoTs||l.proxAcaoTs>now+DAY||l.proxAcaoTs<now-DAY) return false; }
+    if (quick === 'semcontato') { if(l.status!=='contato'&&l.status!=='novo') return false; }
+    if (quick === 'pipeline') { if(l.status==='fechado'||l.status==='perdido') return false; }
     return true;
   });
 
   ls.sort((a,b) => {
-    if (sort==='valor') return (b.valor||0)-(a.valor||0);
-    if (sort==='nome')  return (a.empresa||a.nome||'').localeCompare(b.empresa||b.nome||'');
-    if (sort==='prox')  return (a.proxAcaoTs||9e15)-(b.proxAcaoTs||9e15);
+    if (sort==='valor')  return (b.valor||0)-(a.valor||0);
+    if (sort==='nome')   return (a.empresa||a.nome||'').localeCompare(b.empresa||b.nome||'');
+    if (sort==='prox')   return (a.proxAcaoTs||9e15)-(b.proxAcaoTs||9e15);
+    if (sort==='parado') return (a.atualizadoEm||a.criadoEm||0)-(b.atualizadoEm||b.criadoEm||0);
     return (b.criadoEm||0)-(a.criadoEm||0);
   });
   return ls;
@@ -10605,17 +10627,33 @@ function crmRenderKanban(tab) {
   board.innerHTML = crmCols.map(col => {
     const colLeads = ls.filter(l=>l.status===col.id);
     const colVal   = colLeads.reduce((a,l)=>a+(l.valor||0),0);
+    const isEmpty  = colLeads.length === 0;
+    // Hide truly empty cols (fechado/perdido) unless filtered
+    const hide = isEmpty && (col.id==='fechado'||col.id==='perdido') && !document.getElementById('crm-fstatus-'+tab)?.value;
+    if (hide) return `<div class="crm-col" style="min-width:160px;opacity:.5">
+      <div class="crm-col-header">
+        <div class="crm-col-dot" style="background:${col.color}"></div>
+        <div class="crm-col-name" style="font-size:11px">${esc(col.label)}</div>
+        <div class="crm-col-count">0</div>
+      </div>
+    </div>`;
     return `<div class="crm-col">
       <div class="crm-col-header">
         <div class="crm-col-dot" style="background:${col.color}"></div>
         <div class="crm-col-name">${esc(col.label)}</div>
         <div class="crm-col-count">${colLeads.length}</div>
-        ${colVal?`<div style="font-size:10px;color:${col.color};font-weight:700;margin-left:2px">${fmtVal(colVal)}</div>`:''}
+        ${colVal?`<div style="font-size:10px;color:${col.color};font-weight:700;white-space:nowrap">${fmtVal(colVal)}</div>`:''}
         <button class="crm-col-add" onclick="crmOpenNew('${col.id}','${tab}')" title="Novo lead">+</button>
       </div>
       <div class="crm-col-body">
-        ${colLeads.length ? colLeads.map(l=>crmLeadCard(l,tab)).join('') :
-          `<div class="crm-col-empty"><span class="crm-col-empty-icon">${col.emoji}</span>Nenhum lead</div>`}
+        ${isEmpty
+          ? `<div class="crm-col-empty">
+              <span class="crm-col-empty-icon">${col.emoji}</span>
+              <div style="font-size:12px;font-weight:600;color:#7878A8">Nenhum lead aqui</div>
+              <div style="font-size:11px;color:#c2bfe0;margin-top:3px">Arraste ou crie um novo</div>
+              <button onclick="crmOpenNew('${col.id}','${tab}')" style="margin-top:8px;padding:5px 12px;border-radius:7px;border:1px dashed #c2bfe0;background:none;color:#7878A8;font-size:11px;cursor:pointer;font-family:inherit">+ Novo lead</button>
+            </div>`
+          : colLeads.map(l=>crmLeadCard(l,tab)).join('')}
       </div>
     </div>`;
   }).join('');
@@ -10623,57 +10661,63 @@ function crmRenderKanban(tab) {
 
 // ── Lead card HTML ──
 function crmLeadCard(l, tab) {
-  // Avatar colors based on first letter
   const avatarColors = ['#3a4096','#185FA5','#3B6D11','#854F0B','#A32D2D','#6B3A9E','#0D7A6E','#B5471F'];
-  const avatarColor = avatarColors[(l.empresa||l.nome||'A').charCodeAt(0) % avatarColors.length];
-  const ini = initials(l.empresa||l.nome||'?');
+  const avatarColor  = avatarColors[(l.empresa||l.nome||'A').charCodeAt(0) % avatarColors.length];
+  const ini  = initials(l.empresa||l.nome||'?');
+  const tel  = (l.tel||'').replace(/\D/g,'');
+  const now  = Date.now();
+  const DAY  = 86400000;
+  const dias = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/DAY);
 
-  // Status badge style
-  const statusBadge = {
-    novo:      { label:'Novo lead',      bg:'#1E1E5C', color:'#fff' },
-    contato:   { label:'Sem contato',    bg:'#854F0B', color:'#fff' },
-    proposta:  { label:'Proposta',       bg:'#185FA5', color:'#fff' },
-    negociacao:{ label:'Em negociação',  bg:'#3B6D11', color:'#fff' },
-    fechado:   { label:'Fechado ✓',      bg:'#3B6D11', color:'#fff' },
-    perdido:   { label:'Sem interesse',  bg:'#A32D2D', color:'#fff' },
-  };
-  const sb = statusBadge[l.status] || { label: l.status||'Novo', bg:'#7878A8', color:'#fff' };
+  // Urgency: red >14d, yellow >7d, green otherwise
+  const urgColor = dias>14 ? '#A32D2D' : dias>7 ? '#854F0B' : '#3B6D11';
+  const urgBg    = dias>14 ? '#fcebeb' : dias>7 ? '#fef3e2' : '#eaf3de';
+  const urgLabel = dias>14 ? `🔴 ${dias}d parado` : dias>7 ? `🟡 ${dias}d parado` : dias>0 ? `🟢 ${dias}d` : '🆕 Hoje';
+  const isUrgent = dias>7 && l.status!=='fechado'&&l.status!=='perdido';
 
-  // Last history note
-  const hist = (l.historico||[]);
+  // Last history
+  const hist     = (l.historico||[]);
   const lastNote = hist.length ? hist[hist.length-1] : null;
-  const lastNoteText = lastNote ? lastNote.title : '';
-  const lastNoteDate = lastNote ? fmtDate(lastNote.ts) : '';
 
-  const tel = (l.tel||'').replace(/\D/g,'');
+  // Follow-up indicator
+  const hasFollowup = l.proxAcaoTs && l.proxAcaoTs<=now+DAY && l.proxAcaoTs>now-DAY;
+  const overdue     = l.proxAcaoTs && l.proxAcaoTs<now && l.status!=='fechado'&&l.status!=='perdido';
 
-  return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" onclick="crmOpenLead('${l.id}','${tab}')">
-    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
-      <div style="width:40px;height:40px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
+  return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" style="${isUrgent?'border-color:'+urgColor+';':''}" onclick="crmOpenLead('${l.id}','${tab}')">
+    <!-- Header row -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
       <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-          <span style="padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;background:${sb.bg};color:${sb.color}">${sb.label}</span>
-        </div>
-        <div style="font-size:14px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.empresa||l.nome||'—')}</div>
-        <div style="font-size:11px;color:#7878A8;margin-top:1px">${esc(l.segmento||l.cidade||'')}</div>
+        <div style="font-size:13px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2">${esc(l.empresa||l.nome||'—')}</div>
+        ${l.cidade?`<div style="font-size:10px;color:#7878A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.cidade)}</div>`:''}
       </div>
+      <div style="padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;background:${urgBg};color:${urgColor};white-space:nowrap;flex-shrink:0">${urgLabel}</div>
     </div>
-    ${l.responsavel?`<div style="font-size:11px;color:#5B5BAA;margin-bottom:6px">👤 ${esc(l.responsavel)}</div>`:''}
-    ${lastNoteText?`<div style="background:#f8f7fc;border-radius:7px;padding:7px 9px;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;color:#7878A8;margin-bottom:2px">${lastNoteDate}</div>
-      <div style="font-size:12px;color:#1E1E5C;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(lastNoteText)}</div>
-    </div>`:''}
-    <div style="display:flex;gap:6px;align-items:center">
-      <button style="flex:1;padding:7px 0;background:#3a4096;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"
-        onclick="event.stopPropagation();crmOpenLead('${l.id}','${tab}')">Abrir lead</button>
+
+    <!-- Info row -->
+    <div style="display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap">
+      ${l.valor?`<span style="font-size:11px;font-weight:700;color:#3B6D11;background:#eaf3de;padding:2px 7px;border-radius:6px">${fmtVal(l.valor)}</span>`:''}
+      ${l.responsavel?`<span style="font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">👤 ${esc(l.responsavel.split(' ')[0])}</span>`:''}
+      ${hasFollowup?`<span style="font-size:11px;font-weight:700;color:${overdue?'#A32D2D':'#854F0B'}">📅 ${overdue?'Atrasado':'Hoje'}</span>`:''}
+    </div>
+
+    <!-- Last note -->
+    ${lastNote?`<div style="font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px;padding:4px 7px;background:#f8f7fc;border-radius:6px">💬 ${esc(lastNote.title)}</div>`:''}
+
+    <!-- Actions (visible on hover via CSS, always shown on touch) -->
+    <div class="crm-card-actions" style="display:flex;gap:5px;align-items:center">
+      <button style="flex:1;padding:5px 0;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"
+        onclick="event.stopPropagation();crmOpenLead('${l.id}','${tab}')">Abrir</button>
       ${tel?`<a href="tel:+${tel}" onclick="event.stopPropagation()"
-        style="padding:7px 10px;background:#eaf3de;color:#3B6D11;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center"
-        title="Ligar">📞</a>`:''}
-      <button style="padding:7px 10px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:8px;font-size:13px;cursor:pointer"
+        style="padding:5px 8px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:12px;text-decoration:none;display:flex;align-items:center" title="Ligar">📞</a>`:''}
+      ${tel?`<a href="https://wa.me/55${tel.replace(/^55/,'')}" target="_blank" onclick="event.stopPropagation()"
+        style="padding:5px 8px;background:#e8f5e9;color:#2E7D32;border-radius:7px;font-size:12px;text-decoration:none;display:flex;align-items:center" title="WhatsApp">💬</a>`:''}
+      <button style="padding:5px 8px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:11px;cursor:pointer"
         onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir">🗑</button>
     </div>
   </div>`;
 }
+
 
 // ── Render table for tab ──
 function crmRenderTable(tab) {
