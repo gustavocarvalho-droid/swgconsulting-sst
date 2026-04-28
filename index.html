@@ -10561,7 +10561,7 @@ function crmRenderToolbar(tab) {
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
       <span style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap">Filtros rápidos:</span>
       ${[{v:'',l:'Todos'},{v:'urgentes',l:'⚠ Urgentes'},{v:'followup',l:'📅 Follow-up'},{v:'semcontato',l:'📵 Sem contato'},{v:'pipeline',l:'💰 Pipeline'}].map(f=>
-        `<button onclick="crmFilterQuick('${f.v}','${tab}')" style="padding:4px 12px;border-radius:999px;border:1px solid #c2bfe0;background:#fff;color:#5B5BAA;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" onmouseover="this.style.background='#e7e6f4'" onmouseout="this.style.background='#fff'">${f.l}</button>`
+        '<button onclick="crmFilterQuick(\''+f.v+'\',\'${tab}\')" style="padding:4px 12px;border-radius:999px;border:1px solid #c2bfe0;background:#fff;color:#5B5BAA;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" onmouseover="this.style.background=\'#e7e6f4\'" onmouseout="this.style.background=\'#fff\'">'+f.l+'</button>'
       ).join('')}
       <input type="hidden" id="crm-fquick-${tab}" value="">
     </div>\`;
