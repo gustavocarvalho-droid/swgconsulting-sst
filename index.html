@@ -932,6 +932,14 @@
 
     /* CRM Toolbar */
     .crm-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .crm-toolbar-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .crm-quickfilters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+    .crm-qf-label { font-size:10px; font-weight:700; color:#7878A8; letter-spacing:.5px; text-transform:uppercase; white-space:nowrap; }
+    .crm-qf-btn { padding:4px 12px; border-radius:999px; border:1px solid #c2bfe0; background:#fff; color:#5B5BAA; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .crm-qf-btn:hover { background:#e7e6f4; border-color:#3a4096; color:#1E1E5C; }
+    .crm-qf-red { border-color:#f5c0c0; color:#A32D2D; } .crm-qf-red:hover { background:#fcebeb; }
+    .crm-qf-yellow { border-color:#f5dfa0; color:#854F0B; } .crm-qf-yellow:hover { background:#fef3e2; }
+    .crm-qf-green { border-color:#b8dfa0; color:#3B6D11; } .crm-qf-green:hover { background:#eaf3de; }
     .crm-search {
       display:flex; align-items:center; gap:8px;
       background:#ffffff; border:1px solid #c2bfe0; border-radius:8px;
@@ -1766,11 +1774,16 @@
         </div>
       </div>
 
-      <div class="kpi-row">
+      <!-- KPIs BUSCADOR -->
+      <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#3a4096;display:inline-block"></span>
+        Buscador de Empresas
+      </div>
+      <div class="kpi-row" style="margin-bottom:24px">
         <div class="kpi-card">
           <div class="kpi-label">TOTAL DE LEADS</div>
           <div class="kpi-val" id="dash-kpi-leads">0</div>
-          <div class="kpi-tag" id="dash-kpi-leads-sub" style="color:var(--muted)">no CRM</div>
+          <div class="kpi-tag" id="dash-kpi-leads-sub" style="color:var(--muted)">no CRM Buscador</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">PROPOSTAS ENVIADAS</div>
@@ -1785,16 +1798,50 @@
         <div class="kpi-card">
           <div class="kpi-label">TAXA DE CONVERSÃO</div>
           <div class="kpi-val" id="dash-kpi-conv">0%</div>
-          <div class="kpi-tag up">▲ acima da média</div>
+          <div class="kpi-tag up" id="dash-kpi-conv-tag">—</div>
         </div>
       </div>
 
-      <div class="mid-row">
+      <!-- KPIs WHATSAPP -->
+      <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#25D366;display:inline-block"></span>
+        WhatsApp Disparos
+      </div>
+      <div class="kpi-row" style="margin-bottom:28px">
+        <div class="kpi-card" style="--before-color:#25D366">
+          <div class="kpi-label">TOTAL DE CONTATOS</div>
+          <div class="kpi-val" id="dash-wa-total">0</div>
+          <div class="kpi-tag" style="color:var(--muted)">na base WA</div>
+        </div>
+        <div class="kpi-card" style="--before-color:#1a7a46">
+          <div class="kpi-label">DISPAROS ENVIADOS</div>
+          <div class="kpi-val" id="dash-wa-enviados">0</div>
+          <div class="kpi-tag" id="dash-wa-enviados-sub" style="color:var(--muted)">mensagens</div>
+        </div>
+        <div class="kpi-card" style="--before-color:#A32D2D">
+          <div class="kpi-label">FALHAS</div>
+          <div class="kpi-val" id="dash-wa-falhas">0</div>
+          <div class="kpi-tag" style="color:var(--muted)">não entregues</div>
+        </div>
+        <div class="kpi-card" style="--before-color:#185FA5">
+          <div class="kpi-label">TAXA DE ENTREGA</div>
+          <div class="kpi-val" id="dash-wa-taxa">0%</div>
+          <div class="kpi-tag" id="dash-wa-taxa-tag" style="color:var(--muted)">—</div>
+        </div>
+      </div>
+
+      <!-- GRÁFICOS: dois lado a lado -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+        <!-- Gráfico Buscador -->
         <div class="chart-card">
-          <div class="card-title">Gráfico de Desempenho Mensal</div>
+          <div class="card-title" style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#3a4096;display:inline-block"></span>
+            Buscador — Desempenho Mensal
+          </div>
           <div class="legend">
             <div class="legend-item"><div class="legend-dot" style="background:#1E1E5C"></div> Sem Contato</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#5B5BAA"></div> Proposta Enviada</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#5B5BAA"></div> Proposta</div>
             <div class="legend-item"><div class="legend-dot" style="background:#7176b7"></div> Fechadas</div>
           </div>
           <div class="bars-container" id="dash-bars">
@@ -1805,16 +1852,51 @@
           </div>
         </div>
 
+        <!-- Gráfico WhatsApp -->
+        <div class="chart-card">
+          <div class="card-title" style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#25D366;display:inline-block"></span>
+            WhatsApp — Disparos Mensais
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#25D366"></div> Enviados</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#A32D2D"></div> Falhas</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div> Pendentes</div>
+          </div>
+          <div class="bars-container" id="dash-wa-bars">
+            <div class="bar-group"><div class="bar" id="bar-wa-env-0" style="height:0%;background:#25D366"></div><div class="bar" id="bar-wa-fail-0" style="height:0%;background:#A32D2D"></div><div class="bar" id="bar-wa-pend-0" style="height:0%;background:#185FA5"></div><div class="bar-month">Jan</div></div>
+            <div class="bar-group"><div class="bar" id="bar-wa-env-1" style="height:0%;background:#25D366"></div><div class="bar" id="bar-wa-fail-1" style="height:0%;background:#A32D2D"></div><div class="bar" id="bar-wa-pend-1" style="height:0%;background:#185FA5"></div><div class="bar-month">Fev</div></div>
+            <div class="bar-group"><div class="bar" id="bar-wa-env-2" style="height:0%;background:#25D366"></div><div class="bar" id="bar-wa-fail-2" style="height:0%;background:#A32D2D"></div><div class="bar" id="bar-wa-pend-2" style="height:0%;background:#185FA5"></div><div class="bar-month">Mar</div></div>
+            <div class="bar-group"><div class="bar" id="bar-wa-env-3" style="height:0%;background:#25D366"></div><div class="bar" id="bar-wa-fail-3" style="height:0%;background:#A32D2D"></div><div class="bar" id="bar-wa-pend-3" style="height:0%;background:#185FA5"></div><div class="bar-month">Abr</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Funil de Conversão -->
+      <div class="mid-row" style="margin-bottom:20px">
         <div class="funnel-card">
-          <div class="card-title">Funil de Conversão</div>
+          <div class="card-title">Funil de Conversão — Buscador</div>
           <div class="funnel-row"><div class="funnel-label"><span>Empresas buscadas</span><span style="color:var(--rise-dark);font-weight:800" id="fn-buscadas">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:100%;background:#1E1E5C" id="fn-bar-buscadas"></div></div></div>
-          <div class="funnel-row"><div class="funnel-label"><span>Leads no CRM</span><span style="color:var(--rise-med);font-weight:800" id="fn-leads">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#3a4096" id="fn-bar-leads""></div></div></div>
-          <div class="funnel-row"><div class="funnel-label"><span>Proposta enviada</span><span style="color:var(--rise-mid);font-weight:800" id="fn-prop">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#5B5BAA" id="fn-bar-prop""></div></div></div>
-          <div class="funnel-row"><div class="funnel-label"><span>Em negociação</span><span style="color:var(--rise-light);font-weight:800" id="fn-neg">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#7176b7" id="fn-bar-neg""></div></div></div>
-          <div class="funnel-row"><div class="funnel-label"><span>Fechamentos</span><span style="color:var(--muted);font-weight:800" id="fn-fechado">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#c2bfe0" id="fn-bar-fechado""></div></div></div>
-          <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--rise-bg);">
+          <div class="funnel-row"><div class="funnel-label"><span>Leads no CRM</span><span style="color:var(--rise-med);font-weight:800" id="fn-leads">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#3a4096" id="fn-bar-leads"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Proposta enviada</span><span style="color:var(--rise-mid);font-weight:800" id="fn-prop">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#5B5BAA" id="fn-bar-prop"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Em negociação</span><span style="color:var(--rise-light);font-weight:800" id="fn-neg">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#7176b7" id="fn-bar-neg"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Fechamentos</span><span style="color:var(--muted);font-weight:800" id="fn-fechado">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#c2bfe0" id="fn-bar-fechado"></div></div></div>
+          <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--rise-bg)">
             <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px">CONVERSÃO GERAL</div>
             <div style="font-size:22px;font-weight:800;color:var(--rise-dark)"><span id="fn-conv">0%</span></div>
+          </div>
+        </div>
+
+        <!-- Funil WA -->
+        <div class="funnel-card">
+          <div class="card-title">Funil de Conversão — WhatsApp</div>
+          <div class="funnel-row"><div class="funnel-label"><span>Total contatos</span><span style="color:#1a7a46;font-weight:800" id="fn-wa-total">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:100%;background:#25D366" id="fn-wa-bar-total"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Enviados</span><span style="color:#1a7a46;font-weight:800" id="fn-wa-env">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#25D366" id="fn-wa-bar-env"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Lidos / Respondidos</span><span style="color:#185FA5;font-weight:800" id="fn-wa-resp">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#185FA5" id="fn-wa-bar-resp"></div></div></div>
+          <div class="funnel-row"><div class="funnel-label"><span>Falhas</span><span style="color:#A32D2D;font-weight:800" id="fn-wa-fail">0</span></div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:0%;background:#A32D2D" id="fn-wa-bar-fail"></div></div></div>
+          <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--rise-bg)">
+            <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px">TAXA DE ENTREGA</div>
+            <div style="font-size:22px;font-weight:800;color:#1a7a46"><span id="fn-wa-taxa">0%</span></div>
           </div>
         </div>
       </div>
@@ -2716,6 +2798,15 @@
     <!-- VIEW: CRM -->
     <div id="view-crm" style="display:none;">
 
+      <!-- ── BULK ACTION BAR ── -->
+      <div id="crm-bulk-bar" style="display:none;position:sticky;top:0;z-index:100;background:#1E1E5C;color:#fff;padding:10px 20px;border-radius:10px;margin-bottom:10px;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(30,30,92,.3)">
+        <span class="crm-bulk-count" style="font-size:13px;font-weight:700">0 selecionados</span>
+        <div style="flex:1"></div>
+        <button onclick="crmBulkDelete()" style="padding:6px 16px;background:#A32D2D;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Excluir selecionados</button>
+        <button onclick="Object.keys(crmSelected).forEach(id=>{const cb=document.getElementById('crm-sel-'+id);if(cb)cb.checked=false;});crmSelected={};document.getElementById('crm-bulk-bar').style.display='none';"
+          style="padding:6px 12px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit">✕ Limpar</button>
+      </div>
+
       <!-- ── TAB BAR ── -->
       <div class="crm-tabs-bar">
         <button class="crm-tab active" id="crm-tab-buscador" onclick="crmSetTab('buscador')">
@@ -3102,11 +3193,13 @@ function waDispReset() {
     resetLabel: now.toLocaleDateString('pt-BR', {month:'long', year:'numeric'}),
   };
   localStorage.setItem(WA_DISP_KEY, JSON.stringify(d));
+  dbSave('wa_disparos', d);
   return d;
 }
 
 function waDispSave(d) {
   localStorage.setItem(WA_DISP_KEY, JSON.stringify(d));
+  dbSave('wa_disparos', d);
   if (window._db) window._db.save('wa_disparos_contador', d).catch(()=>{});
   waDispUpdUI();
 }
@@ -5855,9 +5948,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const porteCls = porteMap[e.porte] || 'nd';
     const sitCls   = e.situacao === 'Ativa' ? 'ativa' : (e.situacao ? 'inativ' : 'nd');
     const sitLabel = e.situacao || 'N/D';
-    // Check if already in CRM (for history view)
     const crmKey   = 'hist_crm_' + (e.cnpj||'').replace(/\D/g,'');
     const jaAdded  = fromHistory && localStorage.getItem(crmKey) === '1';
+
+    // Phone formatting for click-to-call
+    function fmtTelLink(tel) {
+      if (!tel) return '';
+      const d = String(tel).replace(/\D/g,'');
+      const num = d.startsWith('55') ? d : '55' + d;
+      return num;
+    }
+
+    // Capital social formatting
+    const capSoc = e.capital_social ? 'R$ ' + Number(e.capital_social).toLocaleString('pt-BR') : null;
+
+    // GMB fields
+    const gmbTel  = e.gmb_phone || e.gmb_telefone || null;
+    const gmbContato = e.gmb_contact || e.gmb_responsavel || e.gmb_owner || null;
 
     return `
       <div class="emp-card">
@@ -5867,30 +5974,74 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="emp-badge bs-${sitCls}">${sitLabel}</span>
         </div>
         <div class="emp-body">
-          ${e.nome_fantasia ? bRow('Fantasia', `<span class="emp-val" style="color:var(--muted)">${bEsc(e.nome_fantasia)}</span>`) : ''}
-          <div>
-            ${bRow('CNPJ', `<span class="emp-val ok">${bEsc(e.cnpj)}</span>${bCp(e.cnpj)}`)}
-            ${e.fonte_cnpj ? `<div class="emp-src">fonte: ${bEsc(e.fonte_cnpj)}</div>` : ''}
+          ${e.nome_fantasia ? `<div class="emp-row"><span class="emp-lbl">Fantasia</span><span class="emp-val" style="color:var(--muted)">${bEsc(e.nome_fantasia)}</span></div>` : ''}
+
+          <!-- CNPJ -->
+          <div class="emp-row">
+            <span class="emp-lbl">CNPJ</span>
+            <span class="emp-val ok">${bEsc(e.cnpj||'—')}</span>
+            ${e.cnpj ? `<button class="cp-btn" onclick="bCopy(this,'${(e.cnpj||'').replace(/'/g,"\\'")}')">copiar</button>` : ''}
           </div>
-          ${e.municipio  ? bRow('Cidade',    `<span class="emp-val">${bEsc(e.municipio)}</span>`) : ''}
-          ${e.atividade  ? bRow('Atividade', `<span class="emp-val">${bEsc(e.atividade)}</span>`) : ''}
-          ${e.email      ? bRow('Email',     `<span class="emp-val ok">${bEsc(e.email)}</span>${bCp(e.email)}`) : ''}
-          ${e.telefone   ? bRow('Telefone',  `<span class="emp-val">${bEsc(e.telefone)}</span>${bCp(e.telefone)}`) : ''}
-          ${e.site       ? bRow('Site',      `<span class="emp-val link"><a href="${bEsc(e.site)}" target="_blank" rel="noopener">${bEsc(e.site.replace(/^https?:\/\//,''))}</a></span>`) : ''}
-          ${e.obs        ? `<div class="emp-obs">${bEsc(e.obs)}</div>` : ''}
+          ${e.fonte_cnpj ? `<div class="emp-src">fonte: ${bEsc(e.fonte_cnpj)}</div>` : ''}
+
+          <!-- Capital Social -->
+          ${capSoc ? `<div class="emp-row"><span class="emp-lbl">Capital Social</span><span class="emp-val ok">${capSoc}</span></div>` : ''}
+
+          <!-- Cidade / Atividade -->
+          ${e.municipio  ? `<div class="emp-row"><span class="emp-lbl">Cidade</span><span class="emp-val">${bEsc(e.municipio)}</span></div>` : ''}
+          ${e.atividade  ? `<div class="emp-row"><span class="emp-lbl">Atividade</span><span class="emp-val">${bEsc(e.atividade)}</span></div>` : ''}
+
+          <!-- Telefone com click-to-call -->
+          ${e.telefone ? `<div class="emp-row">
+            <span class="emp-lbl">Telefone</span>
+            <a href="tel:+${fmtTelLink(e.telefone)}" class="emp-val" style="color:var(--rise-med);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
+              📞 ${bEsc(e.telefone)}
+            </a>
+            <button class="cp-btn" onclick="bCopy(this,'${(e.telefone||'').replace(/'/g,"\\'")}')">copiar</button>
+          </div>` : ''}
+
+          <!-- E-mail -->
+          ${e.email ? `<div class="emp-row">
+            <span class="emp-lbl">E-mail</span>
+            <a href="mailto:${bEsc(e.email)}" class="emp-val ok" style="text-decoration:none">${bEsc(e.email)}</a>
+            <button class="cp-btn" onclick="bCopy(this,'${(e.email||'').replace(/'/g,"\\'")}')">copiar</button>
+          </div>` : ''}
+
+          <!-- Contato GMB -->
+          ${gmbContato ? `<div class="emp-row">
+            <span class="emp-lbl">Contato GMB</span>
+            <span class="emp-val" style="color:#185FA5;font-weight:600">👤 ${bEsc(gmbContato)}</span>
+          </div>` : ''}
+
+          <!-- Telefone GMB com click-to-call -->
+          ${gmbTel ? `<div class="emp-row">
+            <span class="emp-lbl">Telefone GMB</span>
+            <a href="tel:+${fmtTelLink(gmbTel)}" class="emp-val" style="color:#25D366;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
+              📞 ${bEsc(gmbTel)}
+            </a>
+            <button class="cp-btn" onclick="bCopy(this,'${(gmbTel||'').replace(/'/g,"\\'")}')">copiar</button>
+          </div>` : ''}
+
+          <!-- Site -->
+          ${e.site ? `<div class="emp-row"><span class="emp-lbl">Site</span><span class="emp-val link"><a href="${bEsc(e.site)}" target="_blank" rel="noopener">${bEsc(e.site.replace(/^https?:\/\//,''))}</a></span></div>` : ''}
+          ${e.obs  ? `<div class="emp-obs">${bEsc(e.obs)}</div>` : ''}
+
+          <!-- Enrich row -->
           <div id="enrich-${bCardId(e)}" class="enrich-row" style="display:none"></div>
+
+          <!-- Actions -->
           <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--rise-bg);flex-wrap:wrap">
             <button class="enrich-btn" id="enrich-btn-${bCardId(e)}"
               onclick="bEnrichar(this,'${bCardId(e)}',${JSON.stringify(e).replace(/'/g,'&#39;').replace(/"/g,'&quot;')})">
               🔍 Enriquecer
             </button>
-            <button class="cp-btn" id="wa-disp-btn-${(e.cnpj||'').replace(/\D/g,'')}"
+            <button class="cp-btn"
               style="color:#25D366;border-color:#25D366;font-size:10px;padding:3px 10px;background:transparent;display:flex;align-items:center;gap:4px"
               onclick="bEnviarParaDisparoWA(${JSON.stringify(e).replace(/'/g,'&#39;').replace(/"/g,'&quot;')}, this)">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               Disparo WA
             </button>
-            <button class="cp-btn${jaAdded?' done':''}" id="hist-crm-btn-${(e.cnpj||'').replace(/\D/g,'')}"
+            <button class="cp-btn${jaAdded?' done':''}"
               style="color:${jaAdded?'#3B6D11':'var(--rise-med)'};border-color:${jaAdded?'#3B6D11':'var(--rise-med)'};font-size:10px;padding:3px 10px;background:${jaAdded?'#eaf3de':'transparent'}"
               onclick="bAddToCRMEnrichedHist('${bCardId(e)}','${(e.cnpj||'').replace(/\D/g,'')}',${JSON.stringify(e).replace(/'/g,'&#39;').replace(/"/g,'&quot;')})">
               ${jaAdded?'✓ No CRM':'+ CRM'}
@@ -6661,6 +6812,35 @@ function wQSA(sel) {
 window._waGet = wGet;
 
 // ── WA MODULE CONSTANTS ──
+// ── Load WA config from DB into localStorage on startup ──
+async function initWaFromDB() {
+  try {
+    // Load global config
+    const globalCfg = await dbLoad('wa_config_global');
+    if (globalCfg && globalCfg.url) {
+      localStorage.setItem(CFG_KEY, JSON.stringify(globalCfg));
+    }
+    // Load users
+    const users = await dbLoad('wa_users');
+    if (users && typeof users === 'object' && Object.keys(users).length > 0) {
+      localStorage.setItem('rise_wa_users', JSON.stringify(users));
+    }
+    // Load user-specific configs
+    const allUsers = JSON.parse(localStorage.getItem('rise_wa_users') || '{}');
+    for (const k of Object.keys(allUsers)) {
+      const uc = await dbLoad('wa_config_' + k);
+      if (uc && uc.url) localStorage.setItem(CFG_KEY + '_' + k, JSON.stringify(uc));
+    }
+    // Load disparos
+    const disp = await dbLoad('wa_disparos');
+    if (disp) localStorage.setItem(WA_DISP_KEY, JSON.stringify(disp));
+    console.log('[WA] Configurações carregadas do banco');
+  } catch(e) {
+    console.warn('[WA] Usando localStorage local:', e.message);
+  }
+}
+
+
 const CFG_KEY  = 'rise_wa_config';
 const SESS_KEY = 'rise_wa_session';
 
@@ -6739,7 +6919,7 @@ function getUsers() {
     larissap: {name:'Larissa P.', role:'Responsável', master:false, pass:btoa('rise123')},
   };
 }
-function saveUsers(u) { localStorage.setItem('rise_wa_users', JSON.stringify(u)); }
+function saveUsers(u) { localStorage.setItem('rise_wa_users', JSON.stringify(u)); dbSave('wa_users', u); }
 
 // ── CONFIG ──
 function getCfgKey() {
@@ -6747,7 +6927,7 @@ function getCfgKey() {
 }
 function getCfg() {
   try {
-    // Primeiro tenta config do usuário atual, fallback para config global
+    // Primeiro tenta config do usuário atual, fallback para config global (DB loaded via initWaFromDB)
     const userCfg = JSON.parse(localStorage.getItem(getCfgKey()));
     if(userCfg && (userCfg.url||userCfg.inst)) return userCfg;
     return JSON.parse(localStorage.getItem(CFG_KEY)) || {};
@@ -6756,6 +6936,7 @@ function getCfg() {
 }
 function saveCfgLocal(c) {
   localStorage.setItem(getCfgKey(), JSON.stringify(c));
+  dbSave('wa_config_' + (wa_currentUser?.key||'global'), c);
 }
 function getApiBase(){ return (getCfg().url||'').replace(/\/$/,''); }
 function getApiKey() { return getCfg().key||''; }
@@ -6834,6 +7015,7 @@ function doLogin() {
   }
   err.textContent = '';
   localStorage.setItem(SESS_KEY, JSON.stringify({key:wa_selUsuario, ts:Date.now()}));
+  dbSave('wa_session', {key:wa_selUsuario, ts:Date.now()});
   wa_currentUser = {key:wa_selUsuario, ...u};
   iniciarApp();
 }
@@ -6858,12 +7040,15 @@ function iniciarApp() {
       }));
     }
   }
-  carregarDados().then(()=>{
-    startPolling();
-    renderC();
-    updBadges();
-    startAgTimer();
-    checkNum();
+  // Load config from Neon DB into localStorage before starting
+  initWaFromDB().finally(() => {
+    carregarDados().then(()=>{
+      startPolling();
+      renderC();
+      updBadges();
+      startAgTimer();
+      checkNum();
+    });
   });
 }
 // autoLogin disabled
@@ -8381,24 +8566,32 @@ async function trocarNum() {
 }
 
 // ── CONFIG ──
-function loadCfgToForm() {
-  const globalCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{}');
+async function loadCfgToForm() {
+  let globalCfg;
+  try { globalCfg = await dbLoad('wa_config_global'); } catch(e) {}
+  if (!globalCfg || !globalCfg.url) globalCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{}');
   const u=el=>document.getElementById(el);
   if(u('cf-url')) u('cf-url').value=globalCfg.url||'';
   if(u('cf-key')) u('cf-key').value=globalCfg.key||'';
 }
-function saveConf() {
+async function saveConf() {
   const url=(wGet('cf-url')?.value||'').trim();
   const key=(wGet('cf-key')?.value||'').trim();
   // Save URL+Key globally (shared)
   const globalCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{}');
-  localStorage.setItem(CFG_KEY, JSON.stringify({...globalCfg, url, key}));
+  const newGlobalCfg = {...globalCfg, url, key};
+  localStorage.setItem(CFG_KEY, JSON.stringify(newGlobalCfg));
+  dbSave('wa_config_global', newGlobalCfg);
   // Update all user configs with new URL+Key
-  const users=getUsers();
-  Object.keys(users).forEach(k=>{
-    const uc=JSON.parse(localStorage.getItem(CFG_KEY+'_'+k)||'{}');
-    localStorage.setItem(CFG_KEY+'_'+k, JSON.stringify({...uc, url, key}));
-  });
+  try {
+    const users = JSON.parse(localStorage.getItem('rise_wa_users')||'{}');
+    Object.keys(users).forEach(k=>{
+      const uc=JSON.parse(localStorage.getItem(CFG_KEY+'_'+k)||'{}');
+      const newUc = {...uc, url, key};
+      localStorage.setItem(CFG_KEY+'_'+k, JSON.stringify(newUc));
+      dbSave('wa_config_'+k, newUc);
+    });
+  } catch(e) {}
   toast('Configurações globais salvas ✓');
   checkNum();
   renderConfig();
@@ -9276,7 +9469,7 @@ async function fetchChatHistory(tel) {
     });
   }
 
-  function convertMsg(m) {
+  async function convertMsg(m) {
     // Ignorar mensagens com message vazio (sem conteúdo real)
     if(!m.message || Object.keys(m.message).length === 0) return null;
 
@@ -9812,16 +10005,16 @@ function dashUpdKPIs() {
       if (el) el.style.width = Math.min(100, Math.max(0, pct)) + '%';
     }
 
-    // ── CRM data ──
+    // ── CRM data (Buscador) ──
     const crmB = JSON.parse(localStorage.getItem('rise_crm_buscador') || '[]');
     const crmZ = JSON.parse(localStorage.getItem('rise_crm_zap') || '[]');
     const crmE = JSON.parse(localStorage.getItem('rise_crm_empresa') || '[]');
     const all  = [...crmB, ...crmZ, ...crmE];
-    const total    = all.length;
-    const prop     = all.filter(l => l.status === 'proposta').length;
-    const neg      = all.filter(l => l.status === 'negociacao').length;
-    const fechado  = all.filter(l => l.status === 'fechado').length;
-    const conv     = total ? Math.round(fechado / total * 100) : 0;
+    const total   = all.length;
+    const prop    = all.filter(l => l.status === 'proposta').length;
+    const neg     = all.filter(l => l.status === 'negociacao').length;
+    const fechado = all.filter(l => l.status === 'fechado').length;
+    const conv    = total ? Math.round(fechado / total * 100) : 0;
 
     // ── Histórico do buscador ──
     let buscadas = 0;
@@ -9830,39 +10023,87 @@ function dashUpdKPIs() {
       buscadas = hist.reduce((a, h) => a + (h.empresas?.length || 0), 0);
     } catch(e) {}
 
-    // ── KPI cards ──
-    safeUpd('dash-kpi-buscadas',     buscadas);
-    safeUpd('dash-kpi-buscadas-sub', buscadas === 1 ? '1 empresa' : buscadas + ' empresas');
+    // ── KPIs Buscador ──
     safeUpd('dash-kpi-leads',        total);
     safeUpd('dash-kpi-leads-sub',    total + ' leads no CRM');
     safeUpd('dash-kpi-prop',         prop);
-    safeUpd('dash-kpi-prop-sub',     'no pipeline');
+    safeUpd('dash-kpi-prop-sub',     prop + ' no pipeline');
     safeUpd('dash-kpi-fechado',      fechado);
     safeUpd('dash-kpi-fechado-sub',  fechado + ' contratos');
     safeUpd('dash-kpi-conv',         conv + '%');
-    safeUpd('dash-kpi-conv-sub',     'taxa de conversão');
+    const convTag = document.getElementById('dash-kpi-conv-tag');
+    if (convTag) { convTag.textContent = conv >= 10 ? '▲ Acima da média' : conv > 0 ? '→ Em desenvolvimento' : '— Sem dados'; }
 
-    // ── Funnel ──
+    // ── Funnel Buscador ──
     const base = Math.max(buscadas, total, 1);
-    safeUpd('fn-buscadas', buscadas);
-    safeUpd('fn-leads',    total);
-    safeUpd('fn-prop',     prop);
-    safeUpd('fn-neg',      neg);
-    safeUpd('fn-fechado',  fechado);
-    safeUpd('fn-conv',     conv + '%');
+    safeUpd('fn-buscadas', buscadas); safeUpd('fn-leads', total);
+    safeUpd('fn-prop', prop); safeUpd('fn-neg', neg);
+    safeUpd('fn-fechado', fechado); safeUpd('fn-conv', conv + '%');
     safeWidth('fn-bar-buscadas', 100);
-    safeWidth('fn-bar-leads',    buscadas ? total/buscadas*100 : 0);
-    safeWidth('fn-bar-prop',     total ? prop/total*100 : 0);
-    safeWidth('fn-bar-neg',      total ? neg/total*100 : 0);
-    safeWidth('fn-bar-fechado',  total ? fechado/total*100 : 0);
+    safeWidth('fn-bar-leads',   buscadas ? total/buscadas*100 : 0);
+    safeWidth('fn-bar-prop',    total ? prop/total*100 : 0);
+    safeWidth('fn-bar-neg',     total ? neg/total*100 : 0);
+    safeWidth('fn-bar-fechado', total ? fechado/total*100 : 0);
 
-    // ── WA stats ──
-    const waC = (() => { try { return JSON.parse(localStorage.getItem('rise_wa_contacts')||'[]'); } catch(e){return [];} })();
-    const env = waC.filter ? waC.filter(c => c.status==='enviado').length : 0;
-    safeUpd('s-total', waC.length || 0);
-    safeUpd('s-ok',    env);
+    // ── WA data ──
+    let waContacts = [], waLogs = [];
+    try {
+      const waRaw = JSON.parse(localStorage.getItem('rise_db_wa') || '{}');
+      waContacts = waRaw.contacts || JSON.parse(localStorage.getItem('rise_wa_contacts') || '[]');
+      waLogs = waRaw.logs || [];
+    } catch(e) {}
+    const waTot   = waContacts.length;
+    const waEnv   = waLogs.filter(l => l.status === 'sent' || l.status === 'enviado').length;
+    const waFail  = waLogs.filter(l => l.status === 'failed' || l.status === 'erro').length;
+    const waPend  = waTot - waEnv - waFail;
+    const waTaxa  = waEnv + waFail > 0 ? Math.round(waEnv / (waEnv + waFail) * 100) : 0;
 
-    // ── Activity log: últimos leads do CRM ──
+    // ── KPIs WhatsApp ──
+    safeUpd('dash-wa-total',    waTot);
+    safeUpd('dash-wa-enviados', waEnv);
+    safeUpd('dash-wa-enviados-sub', waEnv + ' mensagens');
+    safeUpd('dash-wa-falhas',   waFail);
+    safeUpd('dash-wa-taxa',     waTaxa + '%');
+    const waTaxaTag = document.getElementById('dash-wa-taxa-tag');
+    if (waTaxaTag) waTaxaTag.textContent = waTaxa >= 90 ? '▲ Excelente' : waTaxa > 0 ? '→ Em andamento' : '— Sem disparos';
+
+    // ── Funnel WA ──
+    const waBase = Math.max(waTot, 1);
+    safeUpd('fn-wa-total', waTot); safeUpd('fn-wa-env', waEnv);
+    safeUpd('fn-wa-resp', 0); safeUpd('fn-wa-fail', waFail);
+    safeUpd('fn-wa-taxa', waTaxa + '%');
+    safeWidth('fn-wa-bar-total', 100);
+    safeWidth('fn-wa-bar-env',  waTot ? waEnv/waTot*100 : 0);
+    safeWidth('fn-wa-bar-resp', 0);
+    safeWidth('fn-wa-bar-fail', waTot ? waFail/waTot*100 : 0);
+
+    // ── Gráfico Buscador (barras por mês) ──
+    const meses = ['Jan','Fev','Mar','Abr'];
+    const now = new Date();
+    meses.forEach((_, i) => {
+      const mIdx = (now.getMonth() - 3 + i + 12) % 12;
+      const mLeads = all.filter(l => { const d = new Date(l.criadoEm||0); return d.getMonth() === mIdx; });
+      const mSem   = mLeads.filter(l => l.status==='novo'||l.status==='contato').length;
+      const mProp  = mLeads.filter(l => l.status==='proposta').length;
+      const mFech  = mLeads.filter(l => l.status==='fechado').length;
+      const mMax   = Math.max(mSem + mProp + mFech, 1);
+      const s = (id, v) => { const el = document.getElementById(id); if(el) el.style.height = Math.min(100, v/mMax*100) + '%'; };
+      s('bar-sem-'+i, mSem); s('bar-prop-'+i, mProp); s('bar-fech-'+i, mFech);
+    });
+
+    // ── Gráfico WhatsApp (barras por mês) ──
+    meses.forEach((_, i) => {
+      const mIdx = (now.getMonth() - 3 + i + 12) % 12;
+      const mEnv  = waLogs.filter(l => { const d = new Date(l.ts||0); return d.getMonth()===mIdx && (l.status==='sent'||l.status==='enviado'); }).length;
+      const mFail = waLogs.filter(l => { const d = new Date(l.ts||0); return d.getMonth()===mIdx && (l.status==='failed'||l.status==='erro'); }).length;
+      const mPend = waLogs.filter(l => { const d = new Date(l.ts||0); return d.getMonth()===mIdx && l.status==='pendente'; }).length;
+      const mMax = Math.max(mEnv + mFail + mPend, 1);
+      const s = (id, v) => { const el = document.getElementById(id); if(el) el.style.height = Math.min(100, v/mMax*100) + '%'; };
+      s('bar-wa-env-'+i, mEnv); s('bar-wa-fail-'+i, mFail); s('bar-wa-pend-'+i, mPend);
+    });
+
+    // ── Aliases legado ──
+    safeUpd('s-total', waTot); safeUpd('s-ok', waEnv);
     dashRenderLog('leads');
 
   } catch(e) { console.warn('dashUpdKPIs:', e); }
@@ -10522,51 +10763,39 @@ window.crmFilterQuick = crmFilterQuick;
 function crmRenderToolbar(tab) {
   const wrap = document.getElementById('crm-toolbar-'+tab);
   if (!wrap) return;
-  wrap.innerHTML = `
-    <div class="crm-toolbar">
-      <div class="crm-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7878A8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="crm-search-${tab}" placeholder="Buscar por nome, empresa, CNPJ..." oninput="crmRenderTab('${tab}')">
-      </div>
-      <select class="crm-filter-sel" id="crm-fstatus-${tab}" onchange="crmRenderTab('${tab}')">
-        <option value="">Todos os status</option>
-        ${crmCols.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
-      </select>
-      <select class="crm-filter-sel" id="crm-fresp-${tab}" onchange="crmRenderTab('${tab}')">
-        <option value="">Todos responsáveis</option>
-        <option>Gustavo C.</option><option>Giulia B.</option><option>Larissa P.</option>
-      </select>
-      <select class="crm-filter-sel" id="crm-fprior-${tab}" onchange="crmRenderTab('${tab}')">
-        <option value="">Todas prioridades</option>
-        <option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option>
-      </select>
-      <select class="crm-filter-sel" id="crm-fsort-${tab}" onchange="crmRenderTab('${tab}')">
-        <option value="recent">Mais recentes</option>
-        <option value="valor">Maior valor</option>
-        <option value="nome">A–Z</option>
-        <option value="prox">Próxima ação</option>
-        <option value="parado">Mais parados</option>
-      </select>
-      <div class="crm-view-toggle">
-        <button class="crm-view-btn ${crmViews[tab]==='kanban'?'active':''}" id="crm-vk-${tab}" onclick="crmSetView('kanban','${tab}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
-        </button>
-        <button class="crm-view-btn ${crmViews[tab]==='table'?'active':''}" id="crm-vt-${tab}" onclick="crmSetView('table','${tab}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
-        </button>
-      </div>
-      <button class="crm-btn crm-btn-sm" onclick="crmAddCol()">+ Coluna</button>
-      <button class="crm-btn crm-btn-sm crm-btn-primary" onclick="crmOpenNew('novo','${tab}')">+ Lead</button>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-      <span style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap">Filtros rápidos:</span>
-      ${[{v:'',l:'Todos'},{v:'urgentes',l:'⚠ Urgentes'},{v:'followup',l:'📅 Follow-up'},{v:'semcontato',l:'📵 Sem contato'},{v:'pipeline',l:'💰 Pipeline'}].map(f=>
-        '<button onclick="crmFilterQuick(\''+f.v+'\',\'${tab}\')" style="padding:4px 12px;border-radius:999px;border:1px solid #c2bfe0;background:#fff;color:#5B5BAA;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit" onmouseover="this.style.background=\'#e7e6f4\'" onmouseout="this.style.background=\'#fff\'">'+f.l+'</button>'
-      ).join('')}
-      <input type="hidden" id="crm-fquick-${tab}" value="">
-    </div>\`;
-}
+  const empresaName = crmData?.empresaName || 'SWG Consulting';
+  const colOpts = crmCols.map(c=>'<option value="'+c.id+'"'+(c.id==='novo'?' selected':'')+'>'+c.label+'</option>').join('');
+  const respOpts = '<option value="">Todos responsáveis</option><option>Gustavo C.</option><option>Giulia B.</option><option>Larissa P.</option>';
+  const priorOpts = '<option value="">Todas prioridades</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option>';
+  const sortOpts = '<option value="recent">Mais recentes</option><option value="valor">Maior valor</option><option value="nome">A-Z</option><option value="prox">Próxima ação</option><option value="parado">Mais parados</option>';
+  const vk = crmViews[tab]==='kanban' ? ' active' : '';
+  const vt = crmViews[tab]==='table'  ? ' active' : '';
 
+  wrap.innerHTML = [
+    '<div class="crm-toolbar-row">',
+    '  <div class="crm-search-wrap"><input class="crm-search" id="crm-search-'+tab+'" placeholder="Buscar por nome, empresa, CNPJ..." oninput="crmRenderTab(\''+tab+'\')" /></div>',
+    '  <select class="crm-filter-sel" id="crm-fstatus-'+tab+'" onchange="crmRenderTab(\''+tab+'\')"><option value="">Todos os status</option>'+colOpts+'</select>',
+    '  <select class="crm-filter-sel" id="crm-fresp-'+tab+'" onchange="crmRenderTab(\''+tab+'\')">'+respOpts+'</select>',
+    '  <select class="crm-filter-sel" id="crm-fprior-'+tab+'" onchange="crmRenderTab(\''+tab+'\')">'+priorOpts+'</select>',
+    '  <select class="crm-filter-sel" id="crm-fsort-'+tab+'" onchange="crmRenderTab(\''+tab+'\')">'+sortOpts+'</select>',
+    '  <div class="crm-view-toggle">',
+    '    <button class="crm-view-btn'+vk+'" onclick="crmSetView(\'kanban\',\''+tab+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg></button>',
+    '    <button class="crm-view-btn'+vt+'" onclick="crmSetView(\'table\',\''+tab+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>',
+    '  </div>',
+    '  <button class="crm-btn crm-btn-sm" onclick="crmAddCol()">+ Coluna</button>',
+    '  <button class="crm-btn crm-btn-sm crm-btn-primary" onclick="crmOpenNew(\'novo\',\''+tab+'\')">+ Lead</button>',
+    '</div>',
+    '<div class="crm-quickfilters">',
+    '  <span class="crm-qf-label">Filtros rápidos:</span>',
+    '  <button class="crm-qf-btn" onclick="crmFilterQuick(\'\',\''+tab+'\')">Todos</button>',
+    '  <button class="crm-qf-btn crm-qf-red" onclick="crmFilterQuick(\'urgentes\',\''+tab+'\')">⚠ Urgentes</button>',
+    '  <button class="crm-qf-btn crm-qf-yellow" onclick="crmFilterQuick(\'followup\',\''+tab+'\')">📅 Follow-up</button>',
+    '  <button class="crm-qf-btn" onclick="crmFilterQuick(\'semcontato\',\''+tab+'\')">📵 Sem contato</button>',
+    '  <button class="crm-qf-btn crm-qf-green" onclick="crmFilterQuick(\'pipeline\',\''+tab+'\')">💰 Pipeline</button>',
+    '  <input type="hidden" id="crm-fquick-'+tab+'" value="">',
+    '</div>'
+  ].join('\n');
+}
 // ── Filtered leads for a tab ──
 function crmFiltered(tab) {
   const srch  = (document.getElementById('crm-search-'+tab)?.value||'').toLowerCase();
@@ -10669,51 +10898,70 @@ function crmLeadCard(l, tab) {
   const DAY  = 86400000;
   const dias = Math.floor((now-(l.atualizadoEm||l.criadoEm||now))/DAY);
 
-  // Urgency: red >14d, yellow >7d, green otherwise
+  // Urgency indicator
   const urgColor = dias>14 ? '#A32D2D' : dias>7 ? '#854F0B' : '#3B6D11';
   const urgBg    = dias>14 ? '#fcebeb' : dias>7 ? '#fef3e2' : '#eaf3de';
-  const urgLabel = dias>14 ? `🔴 ${dias}d parado` : dias>7 ? `🟡 ${dias}d parado` : dias>0 ? `🟢 ${dias}d` : '🆕 Hoje';
-  const isUrgent = dias>7 && l.status!=='fechado'&&l.status!=='perdido';
+  const urgLabel = dias>14 ? `🔴 ${dias}d` : dias>7 ? `🟡 ${dias}d` : dias>0 ? `🟢 ${dias}d` : '🆕';
 
-  // Last history
+  // Last history entry
   const hist     = (l.historico||[]);
   const lastNote = hist.length ? hist[hist.length-1] : null;
+  const lastNoteText = lastNote ? lastNote.title : '';
+  const lastNoteDate = lastNote ? fmtDate(lastNote.ts) : '';
 
-  // Follow-up indicator
-  const hasFollowup = l.proxAcaoTs && l.proxAcaoTs<=now+DAY && l.proxAcaoTs>now-DAY;
-  const overdue     = l.proxAcaoTs && l.proxAcaoTs<now && l.status!=='fechado'&&l.status!=='perdido';
+  // Google Meu Negocio search URL
+  const gmbUrl = `https://www.google.com/search?q=${encodeURIComponent((l.empresa||l.nome||'')+(l.cidade?' '+l.cidade:''))}`;
 
-  return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" style="${isUrgent?'border-color:'+urgColor+';':''}" onclick="crmOpenLead('${l.id}','${tab}')">
-    <!-- Header row -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
-      <div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
+  const cardId = 'crm-sel-' + l.id;
+
+  return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" id="crm-card-${l.id}">
+    <!-- LOGO + NOME -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2">${esc(l.empresa||l.nome||'—')}</div>
+        <div style="font-size:13px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.empresa||l.nome||'—')}</div>
         ${l.cidade?`<div style="font-size:10px;color:#7878A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.cidade)}</div>`:''}
       </div>
-      <div style="padding:2px 7px;border-radius:999px;font-size:9px;font-weight:700;background:${urgBg};color:${urgColor};white-space:nowrap;flex-shrink:0">${urgLabel}</div>
+      <div style="padding:2px 6px;border-radius:999px;font-size:9px;font-weight:700;background:${urgBg};color:${urgColor};flex-shrink:0">${urgLabel}</div>
     </div>
 
-    <!-- Info row -->
-    <div style="display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap">
-      ${l.valor?`<span style="font-size:11px;font-weight:700;color:#3B6D11;background:#eaf3de;padding:2px 7px;border-radius:6px">${fmtVal(l.valor)}</span>`:''}
-      ${l.responsavel?`<span style="font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">👤 ${esc(l.responsavel.split(' ')[0])}</span>`:''}
-      ${hasFollowup?`<span style="font-size:11px;font-weight:700;color:${overdue?'#A32D2D':'#854F0B'}">📅 ${overdue?'Atrasado':'Hoje'}</span>`:''}
-    </div>
+    <!-- RESPONSÁVEL -->
+    ${l.responsavel?`<div style="font-size:11px;color:#5B5BAA;margin-bottom:6px;display:flex;align-items:center;gap:4px">
+      <span style="width:14px;height:14px;border-radius:50%;background:#e7e6f4;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#3a4096;flex-shrink:0">${initials(l.responsavel)}</span>
+      ${esc(l.responsavel)}
+    </div>`:''}
 
-    <!-- Last note -->
-    ${lastNote?`<div style="font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px;padding:4px 7px;background:#f8f7fc;border-radius:6px">💬 ${esc(lastNote.title)}</div>`:''}
+    <!-- HISTÓRICO (última nota) -->
+    ${lastNoteText?`<div style="background:#f8f7fc;border-radius:6px;padding:5px 8px;margin-bottom:8px;font-size:11px;color:#5B5BAA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      💬 ${esc(lastNoteText)}
+      <span style="font-size:9px;color:#c2bfe0;margin-left:4px">${lastNoteDate}</span>
+    </div>`:''}
 
-    <!-- Actions (visible on hover via CSS, always shown on touch) -->
-    <div class="crm-card-actions" style="display:flex;gap:5px;align-items:center">
-      <button style="flex:1;padding:5px 0;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"
+    <!-- BOTÕES: Selecionar | Ligar | GMB | Abrir | Excluir -->
+    <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr auto;gap:4px;align-items:center">
+      <!-- Selecionar (checkbox) -->
+      <input type="checkbox" id="${cardId}" style="width:14px;height:14px;cursor:pointer;accent-color:#3a4096"
+        onclick="event.stopPropagation();crmToggleSelect('${l.id}','${tab}',this)"
+        title="Selecionar para ação em massa">
+
+      <!-- Ligar -->
+      ${tel?`<a href="tel:+${tel.startsWith('55')?tel:'55'+tel}" onclick="event.stopPropagation()"
+        style="padding:5px 4px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px"
+        title="Ligar">📞 Ligar</a>`
+      :`<div></div>`}
+
+      <!-- Google Meu Negócio -->
+      <a href="${gmbUrl}" target="_blank" onclick="event.stopPropagation()"
+        style="padding:5px 4px;background:#e7e6f4;color:#3a4096;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px"
+        title="Google Meu Negócio">🗺️ GMB</a>
+
+      <!-- Abrir Lead -->
+      <button style="padding:5px 4px;background:#1E1E5C;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit"
         onclick="event.stopPropagation();crmOpenLead('${l.id}','${tab}')">Abrir</button>
-      ${tel?`<a href="tel:+${tel}" onclick="event.stopPropagation()"
-        style="padding:5px 8px;background:#eaf3de;color:#3B6D11;border-radius:7px;font-size:12px;text-decoration:none;display:flex;align-items:center" title="Ligar">📞</a>`:''}
-      ${tel?`<a href="https://wa.me/55${tel.replace(/^55/,'')}" target="_blank" onclick="event.stopPropagation()"
-        style="padding:5px 8px;background:#e8f5e9;color:#2E7D32;border-radius:7px;font-size:12px;text-decoration:none;display:flex;align-items:center" title="WhatsApp">💬</a>`:''}
-      <button style="padding:5px 8px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:11px;cursor:pointer"
-        onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir">🗑</button>
+
+      <!-- Excluir -->
+      <button style="padding:5px 7px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:7px;font-size:12px;cursor:pointer"
+        onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir lead">🗑</button>
     </div>
   </div>`;
 }
@@ -11088,6 +11336,40 @@ function crmQuickStatusDirect(id, tab, newStatus) {
   crmRenderTab(tab);
 }
 window.crmQuickStatusDirect = crmQuickStatusDirect;
+
+// ── Seleção em massa ──
+let crmSelected = {};
+function crmToggleSelect(id, tab, checkbox) {
+  if (checkbox.checked) {
+    crmSelected[id] = tab;
+  } else {
+    delete crmSelected[id];
+  }
+  const count = Object.keys(crmSelected).length;
+  const bar = document.getElementById('crm-bulk-bar');
+  if (bar) {
+    bar.style.display = count > 0 ? 'flex' : 'none';
+    const lbl = bar.querySelector('.crm-bulk-count');
+    if (lbl) lbl.textContent = count + ' selecionado' + (count > 1 ? 's' : '');
+  }
+}
+function crmBulkDelete() {
+  if (!Object.keys(crmSelected).length) return;
+  if (!confirm('Excluir ' + Object.keys(crmSelected).length + ' leads selecionados?')) return;
+  crmLoad();
+  Object.entries(crmSelected).forEach(([id, tab]) => {
+    const list = crmData[tab] || [];
+    const idx = list.findIndex(l => l.id === id);
+    if (idx >= 0) list.splice(idx, 1);
+  });
+  crmSelected = {};
+  crmSave();
+  const bar = document.getElementById('crm-bulk-bar');
+  if (bar) bar.style.display = 'none';
+  CRM_TABS.forEach(t => crmRenderTab(t));
+}
+window.crmToggleSelect = crmToggleSelect;
+window.crmBulkDelete   = crmBulkDelete;
 
 // ── Add column ──
 function crmAddCol() {
