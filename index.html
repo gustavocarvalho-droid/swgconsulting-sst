@@ -296,7 +296,13 @@
     .fbtn:hover  { border-color: var(--rise-med); color: var(--rise-med); }
     .fbtn.active { border-color: var(--rise-med); color: var(--rise-med); background: rgba(58,64,150,0.08); }
 
-    .b-results { display: flex; flex-direction: column; gap: .75rem; }
+    .b-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: .75rem;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .b-results { grid-template-columns: 1fr; } }
 
     /* Empresa card */
     .emp-card {
@@ -4435,7 +4441,13 @@ document.addEventListener('DOMContentLoaded', function() {
     .fbtn:hover  { border-color: var(--rise-med); color: var(--rise-med); }
     .fbtn.active { border-color: var(--rise-med); color: var(--rise-med); background: rgba(58,64,150,0.08); }
 
-    .b-results { display: flex; flex-direction: column; gap: .75rem; }
+    .b-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: .75rem;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .b-results { grid-template-columns: 1fr; } }
 
     /* Empresa card */
     .emp-card {
@@ -5921,10 +5933,10 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    container.innerHTML = filtered.map(bRenderCard).join('');
+    container.innerHTML = filtered.map(e => bRenderCard(e, false)).join('');
 
     // ── AUTO-CRM: add each result to CRM Buscador as "contato" ──
-    if (!fromHistory && typeof window.crmAddLeadFromSource === 'function') {
+    if (typeof window.crmAddLeadFromSource === 'function') {
       filtered.forEach(e => {
         window.crmAddLeadFromSource('buscador', {
           empresa:   e.nome || e.nome_fantasia || '',
@@ -5941,6 +5953,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
     }
+
+    // ── AUTO-ENRICH: busca GMB automaticamente para os primeiros 5 resultados ──
+    filtered.slice(0, 5).forEach(e => {
+      const cardId = bCardId(e);
+      if (bEnrichCache[cardId]) return; // já enriquecido
+      setTimeout(() => {
+        const btn = document.getElementById('enrich-btn-' + cardId);
+        if (btn && !btn.classList.contains('done')) bEnrichar(btn, cardId, e);
+      }, 500 + filtered.indexOf(e) * 800); // escalonado para não sobrecarregar
+    });
   }
 
   function bRenderCard(e, fromHistory) {
@@ -6170,6 +6192,37 @@ document.addEventListener('DOMContentLoaded', function() {
   function bShowEnrich(cardId, data) {
     const wrap = document.getElementById('enrich-' + cardId);
     if (!wrap) return;
+
+    // ── Refresh GMB phone fields in the card if available ──
+    const gmbTel = data.gmb_phone || data.gmb_telefone || data.gmb_whatsapp;
+    const gmbContato = data.gmb_contact || data.gmb_responsavel || data.gmb_owner;
+    if (gmbTel || gmbContato) {
+      const cardEl = wrap.closest('.emp-card');
+      if (cardEl) {
+        // Update or add GMB phone row
+        let gmbRow = cardEl.querySelector('.gmb-tel-row');
+        if (!gmbRow && gmbTel) {
+          const d = String(gmbTel).replace(/\D/g,'');
+          const num = d.startsWith('55') ? d : '55' + d;
+          const newRow = document.createElement('div');
+          newRow.className = 'emp-row gmb-tel-row';
+          newRow.innerHTML = `<span class="emp-lbl">Tel. GMB</span>
+            <a href="tel:+${num}" class="emp-val" style="color:#25D366;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
+              📞 ${gmbTel}
+            </a>`;
+          wrap.parentNode.insertBefore(newRow, wrap);
+        }
+        // Update or add GMB contact row
+        let gmbCRow = cardEl.querySelector('.gmb-contact-row');
+        if (!gmbCRow && gmbContato) {
+          const newRow2 = document.createElement('div');
+          newRow2.className = 'emp-row gmb-contact-row';
+          newRow2.innerHTML = `<span class="emp-lbl">Contato GMB</span>
+            <span class="emp-val" style="color:#185FA5;font-weight:600">👤 ${gmbContato}</span>`;
+          wrap.parentNode.insertBefore(newRow2, wrap);
+        }
+      }
+    }
 
     // ── CNAE / Grau de Risco block ──
     const riscoCores = {1:'#3B6D11',2:'#854F0B',3:'#C05621',4:'#A32D2D'};
