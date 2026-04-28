@@ -5837,6 +5837,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     container.innerHTML = filtered.map(bRenderCard).join('');
+
+    // ── AUTO-CRM: add each result to CRM Buscador as "contato" ──
+    if (!fromHistory && typeof window.crmAddLeadFromSource === 'function') {
+      filtered.forEach(e => {
+        window.crmAddLeadFromSource('buscador', {
+          empresa:   e.nome || e.nome_fantasia || '',
+          nome:      e.nome_fantasia || '',
+          cnpj:      e.cnpj || '',
+          tel:       e.telefone || '',
+          email:     e.email || '',
+          cidade:    e.municipio || '',
+          segmento:  e.atividade || '',
+          site:      e.site || '',
+          status:    'contato',
+          prioridade:'baixa',
+          obs:       e.obs || '',
+        });
+      });
+    }
   }
 
   function bRenderCard(e, fromHistory) {
@@ -10404,6 +10423,7 @@ function uid()           { return Date.now() + '_' + Math.random().toString(36).
 function esc(s)          { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmtVal(v)       { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v||0); }
 function fmtDate(ts)     { return ts ? new Date(ts).toLocaleDateString('pt-BR') : '—'; }
+function fmtTel(t)       { const d=(t||'').replace(/\D/g,''); if(d.length===11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`; if(d.length===10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; return t||'—'; }
 function initials(name)  { return (name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'; }
 function statusLabel(s)  { return (crmCols.find(c=>c.id===s)||{}).label || s; }
 function statusClass(s)  {
@@ -10603,30 +10623,54 @@ function crmRenderKanban(tab) {
 
 // ── Lead card HTML ──
 function crmLeadCard(l, tab) {
-  const tags = (l.servicos||[]).slice(0,3).map(s => {
-    const cls = {PGR:'pgr',LTCAT:'ltcat',PCMSO:'pcmso',PPRA:'ppra'}[s]||'custom';
-    return `<span class="crm-tag crm-tag-${cls}">${esc(s)}</span>`;
-  }).join('');
-  const proxLabel = l.proxAcaoTs ? new Date(l.proxAcaoTs).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
-  const overdue   = l.proxAcaoTs && l.proxAcaoTs < Date.now() && l.status!=='fechado' && l.status!=='perdido';
+  // Avatar colors based on first letter
+  const avatarColors = ['#3a4096','#185FA5','#3B6D11','#854F0B','#A32D2D','#6B3A9E','#0D7A6E','#B5471F'];
+  const avatarColor = avatarColors[(l.empresa||l.nome||'A').charCodeAt(0) % avatarColors.length];
+  const ini = initials(l.empresa||l.nome||'?');
+
+  // Status badge style
+  const statusBadge = {
+    novo:      { label:'Novo lead',      bg:'#1E1E5C', color:'#fff' },
+    contato:   { label:'Sem contato',    bg:'#854F0B', color:'#fff' },
+    proposta:  { label:'Proposta',       bg:'#185FA5', color:'#fff' },
+    negociacao:{ label:'Em negociação',  bg:'#3B6D11', color:'#fff' },
+    fechado:   { label:'Fechado ✓',      bg:'#3B6D11', color:'#fff' },
+    perdido:   { label:'Sem interesse',  bg:'#A32D2D', color:'#fff' },
+  };
+  const sb = statusBadge[l.status] || { label: l.status||'Novo', bg:'#7878A8', color:'#fff' };
+
+  // Last history note
+  const hist = (l.historico||[]);
+  const lastNote = hist.length ? hist[hist.length-1] : null;
+  const lastNoteText = lastNote ? lastNote.title : '';
+  const lastNoteDate = lastNote ? fmtDate(lastNote.ts) : '';
+
+  const tel = (l.tel||'').replace(/\D/g,'');
+
   return `<div class="crm-lead-card priority-${l.prioridade||'baixa'}" onclick="crmOpenLead('${l.id}','${tab}')">
-    <div class="crm-lead-name">${esc(l.nome||'Lead sem nome')}</div>
-    <div class="crm-lead-empresa">${esc(l.empresa||'')}</div>
-    ${tags?`<div class="crm-lead-tags">${tags}</div>`:''}
-    <div class="crm-lead-meta">
-      <div class="crm-lead-tel">${esc(l.tel||'')}</div>
-      ${l.valor?`<div class="crm-lead-val">${fmtVal(l.valor)}</div>`:''}
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+      <div style="width:40px;height:40px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;background:${sb.bg};color:${sb.color}">${sb.label}</span>
+        </div>
+        <div style="font-size:14px;font-weight:800;color:#1E1E5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.empresa||l.nome||'—')}</div>
+        <div style="font-size:11px;color:#7878A8;margin-top:1px">${esc(l.segmento||l.cidade||'')}</div>
+      </div>
     </div>
-    <div class="crm-lead-footer">
-      <div class="crm-lead-resp">
-        <div class="crm-lead-avatar">${initials(l.responsavel)}</div>
-        ${esc(l.responsavel?l.responsavel.split(' ')[0]:'—')}
-      </div>
-      ${proxLabel?`<div style="font-size:10px;font-weight:600;color:${overdue?'#A32D2D':'#7878A8'}">${overdue?'⚠':'📅'} ${proxLabel}</div>`:''}
-      <div class="crm-lead-actions">
-        <button class="crm-lead-action-btn" onclick="event.stopPropagation();crmQuickStatus('${l.id}','${tab}')" title="Avançar etapa">→</button>
-        <button class="crm-lead-action-btn" onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir">🗑</button>
-      </div>
+    ${l.responsavel?`<div style="font-size:11px;color:#5B5BAA;margin-bottom:6px">👤 ${esc(l.responsavel)}</div>`:''}
+    ${lastNoteText?`<div style="background:#f8f7fc;border-radius:7px;padding:7px 9px;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;color:#7878A8;margin-bottom:2px">${lastNoteDate}</div>
+      <div style="font-size:12px;color:#1E1E5C;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(lastNoteText)}</div>
+    </div>`:''}
+    <div style="display:flex;gap:6px;align-items:center">
+      <button style="flex:1;padding:7px 0;background:#3a4096;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"
+        onclick="event.stopPropagation();crmOpenLead('${l.id}','${tab}')">Abrir lead</button>
+      ${tel?`<a href="tel:+${tel}" onclick="event.stopPropagation()"
+        style="padding:7px 10px;background:#eaf3de;color:#3B6D11;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center"
+        title="Ligar">📞</a>`:''}
+      <button style="padding:7px 10px;background:#f8f7fc;color:#A32D2D;border:1px solid #f0d0d0;border-radius:8px;font-size:13px;cursor:pointer"
+        onclick="event.stopPropagation();crmDelLead('${l.id}','${tab}')" title="Excluir">🗑</button>
     </div>
   </div>`;
 }
@@ -10736,14 +10780,66 @@ function crmLeadModal(l, defaultStatus, tab) {
     </div>`).join('');
 
   return `
-    <div class="crm-modal-header">
-      <div>
-        <div class="crm-modal-title">${isNew?'+ Novo Lead':esc(l.empresa||l.nome||'Lead')}</div>
-        <div class="crm-modal-sub">${isNew?'Preencha os dados do novo lead':esc(l.nome||'Editar lead')}</div>
+    <div class="crm-modal-header" style="background:#0D0D2E;border-radius:16px 16px 0 0;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div style="flex:1">
+        ${!isNew?`<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:6px">Lead criado em ${fmtDate(l?.criadoEm)}</div>`:''}
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:50%;background:#3a4096;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">${initials(l?.empresa||l?.nome||'N')}</div>
+          <div>
+            <div style="font-size:18px;font-weight:800;color:#fff">${isNew?'+ Novo Lead':esc(l.empresa||l.nome||'Lead')}</div>
+            ${!isNew&&l.segmento?`<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">${esc(l.segmento)}</div>`:''}
+          </div>
+        </div>
       </div>
-      <button class="crm-modal-close" onclick="crmCloseModal()">×</button>
+      <button style="background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;line-height:1;padding:4px" onclick="crmCloseModal()">×</button>
     </div>
+
+    ${!isNew?`
+    <!-- AÇÕES RÁPIDAS -->
+    <div style="padding:16px 22px;background:#f8f7fc;border-bottom:1px solid #e7e6f4">
+      <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">AÇÕES DO CRM</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+        ${['novo','contato','proposta','negociacao','fechado','perdido'].map(s => {
+          const labels = {novo:'Novo lead',contato:'Sem contato',proposta:'Proposta enviada',negociacao:'Em negociação',fechado:'Fechado ✓',perdido:'Sem interesse'};
+          const active = l.status === s;
+          return `<button onclick="crmQuickStatusDirect('${l.id}','${tab}','${s}')"
+            style="padding:6px 12px;border-radius:999px;border:1px solid ${active?'#1E1E5C':'#c2bfe0'};background:${active?'#1E1E5C':'#fff'};color:${active?'#fff':'#1E1E5C'};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">${labels[s]}</button>`;
+        }).join('')}
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">ATALHOS</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${l.tel?`<a href="tel:+${(l.tel||'').replace(/\D/g,'')}" style="padding:8px 14px;background:#eaf3de;color:#3B6D11;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">📞 Ligação</a>`:''}
+        ${l.tel?`<a href="https://wa.me/55${(l.tel||'').replace(/\D/g,'').replace(/^55/,'')}" target="_blank" style="padding:8px 14px;background:#e8f5e9;color:#2E7D32;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">💬 WhatsApp</a>`:''}
+        ${l.empresa?`<a href="https://www.google.com/search?q=${encodeURIComponent((l.empresa||'')+' '+l.cidade)}" target="_blank" style="padding:8px 14px;background:#e7e6f4;color:#3a4096;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">🔍 Pesquisar</a>`:''}
+      </div>
+    </div>
+
+    <!-- INFO CARDS -->
+    <div style="padding:16px 22px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f7fc;border-bottom:1px solid #e7e6f4">
+      <div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">FUNIL</div>
+        <div style="font-size:20px;font-weight:800;color:#1E1E5C">${statusLabel(l.status)||'Novo Lead'}</div>
+        <div style="font-size:11px;color:#7878A8;margin-top:2px">Etapa atual do lead</div>
+      </div>
+      <div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">TELEFONE</div>
+        <div style="font-size:20px;font-weight:800;color:#1E1E5C">${l.tel?fmtTel(l.tel):'—'}</div>
+        <div style="font-size:11px;color:#7878A8;margin-top:2px">Contato principal</div>
+      </div>
+      ${l.cidade?`<div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">ENDEREÇO</div>
+        <div style="font-size:14px;font-weight:700;color:#1E1E5C">${esc(l.cidade)}</div>
+        <div style="font-size:11px;color:#7878A8;margin-top:2px">Cidade / UF</div>
+      </div>`:''}
+      ${l.responsavel?`<div style="background:#fff;border:1px solid #e7e6f4;border-radius:10px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">RESPONSÁVEL</div>
+        <div style="font-size:14px;font-weight:700;color:#1E1E5C">${esc(l.responsavel)}</div>
+        <div style="font-size:11px;color:#7878A8;margin-top:2px">Vendedor responsável</div>
+      </div>`:''}
+    </div>`:''}
+
     <div class="crm-modal-body">
+      <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">CADASTRO E EDIÇÃO</div>
       <div class="crm-form-row">
         <div><label class="crm-label">Empresa / Razão Social *</label>
           <input type="text" class="crm-inp" id="crm-f-empresa" value="${esc(l?.empresa||'')}" placeholder="Empresa SST Ltda"></div>
@@ -10805,12 +10901,12 @@ function crmLeadModal(l, defaultStatus, tab) {
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${svcChecks}</div>
       </div>
       <div class="crm-form-full">
-        <label class="crm-label">Observações</label>
+        <label class="crm-label">Observações / Notas</label>
         <textarea class="crm-ta" id="crm-f-obs" rows="3" placeholder="Anotações sobre este lead...">${esc(l?.obs||'')}</textarea>
       </div>
       ${!isNew&&(l?.historico||[]).length?`
         <div style="height:1px;background:#e7e6f4;margin:14px 0"></div>
-        <div style="font-size:12px;font-weight:700;color:#1E1E5C;margin-bottom:10px">📋 Histórico</div>
+        <div style="font-size:11px;font-weight:700;color:#7878A8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px">LINHA DO TEMPO</div>
         <div class="crm-timeline">${timeline}</div>
       `:''}
     </div>
@@ -10819,7 +10915,7 @@ function crmLeadModal(l, defaultStatus, tab) {
       <div style="flex:1"></div>
       <button class="crm-btn" onclick="crmCloseModal()">Cancelar</button>
       <button class="crm-btn crm-btn-primary" onclick="crmSaveLead('${l?.id||''}','${tab}')">
-        ${isNew?'+ Criar Lead':'💾 Salvar'}
+        ${isNew?'+ Criar Lead':'💾 Salvar CRM'}
       </button>
     </div>`;
 }
@@ -10931,6 +11027,23 @@ function crmQuickStatus(id, tab) {
   crmRenderTab(tab);
 }
 window.crmQuickStatus = crmQuickStatus;
+
+// ── Quick status direct (from modal action buttons) ──
+function crmQuickStatusDirect(id, tab, newStatus) {
+  crmLoad();
+  const list = crmData[tab] || [];
+  const l = list.find(x => x.id === id);
+  if (!l) return;
+  l.status = newStatus;
+  l.atualizadoEm = Date.now();
+  l.historico = l.historico || [];
+  const labels = {novo:'Novo lead',contato:'Sem contato',proposta:'Proposta enviada',negociacao:'Em negociação',fechado:'Fechado',perdido:'Sem interesse'};
+  l.historico.push({ type:'status', title:`Status: ${labels[newStatus]||newStatus}`, ts: Date.now() });
+  crmSave();
+  crmCloseModal();
+  crmRenderTab(tab);
+}
+window.crmQuickStatusDirect = crmQuickStatusDirect;
 
 // ── Add column ──
 function crmAddCol() {
